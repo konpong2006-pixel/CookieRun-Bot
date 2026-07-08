@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CookieBot Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-anim"></div>
+    
+    <div class="dashboard-container">
+        <header>
+            <div class="header-content">
+                <h1><span class="highlight">Cookie</span>Bot</h1>
+                <p class="subtitle">Automated Farming System</p>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="control-panel">Control Panel</button>
+                <button class="tab-btn" data-tab="stats-dashboard">Dashboard</button>
+            </div>
+        </header>
+
+        <!-- Control Panel Tab -->
+        <main id="control-panel" class="dashboard-grid tab-content active">
+            <!-- ซ้าย: จอภาพ -->
+            <div class="screen-panel glass">
+                <div class="screen-header">
+                    <span class="live-dot"></span>
+                    <h3>Live Monitor</h3>
+                </div>
+                <div class="screen-container">
+                    <img id="game-screen" src="/api/stream" alt="Live Game Screen">
+                </div>
+            </div>
+
+            <!-- ขวา: ควบคุม -->
+            <div class="side-panel">
+                <div class="status-panel glass" style="position: relative;">
+                    <div id="pattern-dot" class="pattern-dot" title="Pattern Status" style="display:none;"></div>
+                    <div class="status-indicator">
+                        <div class="dot" id="status-dot"></div>
+                        <h2 id="status-text">OFFLINE</h2>
+                    </div>
+                    <p id="status-message" class="system-message">Ready to start</p>
+                    
+                    <div class="state-badge">
+                        State: <span id="current-state">IDLE</span>
+                        <span class="timer-badge">⏱️ <span id="run-timer">00:00</span></span>
+                    </div>
+                </div>
+
+                <div class="history-panel glass" style="padding: 15px;">
+                    <h3 style="margin-bottom: 10px; font-size: 1rem;">📜 Run History</h3>
+                    <ul id="history-list" style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; max-height: 150px; overflow-y: auto;">
+                        <li style="color: var(--text-muted); text-align: center; padding: 10px 0;">No history yet</li>
+                    </ul>
+                </div>
+
+                <div class="controls-panel glass">
+                    <h3>⚙️ Settings</h3>
+                    
+                    <h3 style="margin-top:20px;">Farm Mode</h3>
+                    <div class="mode-selector">
+                        <input type="radio" id="mode-coin" name="farm-mode" value="COIN" checked>
+                        <label for="mode-coin" class="mode-btn coin-mode">
+                            <div class="icon">🪙</div>
+                            Coin Farm
+                        </label>
+                        
+                        <input type="radio" id="mode-box" name="farm-mode" value="BOX">
+                        <label for="mode-box" class="mode-btn box-mode">
+                            <div class="icon">🎁</div>
+                            Mystery Box
+                        </label>
+                    </div>
+
+                    <div class="settings-group" style="margin-top:20px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="toggle-use-timeout" checked style="width: 18px; height: 18px;">
+                            <span>บังคับจบเกมด้วยเวลา (Timer Timeout)</span>
+                        </label>
+                    </div>
+
+                    <div id="coin-settings-group" class="settings-group" style="margin-top:10px;">
+                        <label for="input-coin-timeout">Coin Farm Timer (วินาที)</label>
+                        <div class="input-row">
+                            <input type="number" id="input-coin-timeout" value="205">
+                            <button id="btn-save-coin-settings" class="btn secondary">Save</button>
+                        </div>
+                    </div>
+                    
+                    <div id="box-settings-group" class="settings-group" style="margin-top:20px; display:none;">
+                        <label for="input-box-timeout">Box Farm Timer (วินาที)</label>
+                        <div class="input-row">
+                            <input type="number" id="input-box-timeout" value="150">
+                            <button id="btn-save-box-settings" class="btn secondary">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="btn-start" class="btn primary">INITIALIZE</button>
+                        <button id="btn-stop" class="btn danger" disabled>EMERGENCY STOP</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Stats Dashboard Tab -->
+        <main id="stats-dashboard" class="dashboard-grid tab-content" style="display: none;">
+            <div class="stats-panel glass" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>📊 Session Statistics</h2>
+                    <button id="btn-reset-stats" class="btn danger" style="padding: 5px 15px; font-size: 0.9rem;">Reset Data</button>
+                </div>
+                <div class="stats-cards" style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+                    <div class="stat-card" style="flex: 1; min-width: 150px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); text-align: center;">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 10px;">Total Runs</h3>
+                        <div id="stat-total-runs" style="font-size: 2.5rem; font-weight: bold; color: var(--primary);">0</div>
+                    </div>
+                    <div class="stat-card" style="flex: 1; min-width: 150px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); text-align: center;">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 10px;">Box Runs</h3>
+                        <div id="stat-box-runs" style="font-size: 2.5rem; font-weight: bold; color: var(--accent-purple);">0</div>
+                    </div>
+                    <div class="stat-card" style="flex: 1; min-width: 150px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); text-align: center;">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 10px;">Coin Runs</h3>
+                        <div id="stat-coin-runs" style="font-size: 2.5rem; font-weight: bold; color: var(--accent-green);">0</div>
+                    </div>
+                    <div class="stat-card" style="flex: 1; min-width: 250px; padding: 20px; border-radius: 12px; background: rgba(0,0,0,0.3); text-align: center;">
+                        <h3 style="color: var(--text-muted); font-size: 1rem; margin-bottom: 10px;">Total Coins Farmed</h3>
+                        <div id="stat-total-coins" style="font-size: 2.5rem; font-weight: bold; color: #f59e0b;">0 <span style="font-size:1rem">🪙</span></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px;">
+                    <canvas id="runsChart" style="max-height: 250px;"></canvas>
+                </div>
+                
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Recent Runs</h3>
+                <table class="run-history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 10px;">Mode</th>
+                            <th style="padding: 10px;">Pattern</th>
+                            <th style="padding: 10px;">Duration</th>
+                            <th style="padding: 10px; text-align: right;">Coins Earned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-history-body">
+                        <!-- Populated by JS -->
+                        <tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">No data yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        
+        <footer>
+            v2.0 • Premium Glassmorphism UI
+        </footer>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=1.6"></script>
+</body>
+</html>

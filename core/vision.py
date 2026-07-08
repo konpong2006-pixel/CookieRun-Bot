@@ -1,0 +1,255 @@
+import win32gui
+import win32ui
+import win32con
+import numpy as np
+import cv2
+from PIL import Image
+import pytesseract
+from config import TESSERACT_CMD, BASE_WIDTH, BASE_HEIGHT
+
+pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
+
+class Vision:
+    def __init__(self, render_hwnd):
+        self.render_hwnd = render_hwnd
+
+    def capture_screen(self):
+        rect = win32gui.GetClientRect(self.render_hwnd)
+        width = rect[2] - rect[0]
+        height = rect[3] - rect[1]
+
+        hwndDC = win32gui.GetWindowDC(self.render_hwnd)
+        mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+        saveDC = mfcDC.CreateCompatibleDC()
+
+        saveBitMap = win32ui.CreateBitmap()
+        saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+        saveDC.SelectObject(saveBitMap)
+
+        import ctypes
+        result = ctypes.windll.user32.PrintWindow(self.render_hwnd, saveDC.GetSafeHdc(), 3)
+
+        bmpinfo = saveBitMap.GetInfo()
+        bmpstr = saveBitMap.GetBitmapBits(True)
+
+        img = Image.frombuffer(
+            'RGB',
+            (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+            bmpstr, 'raw', 'BGRX', 0, 1
+        )
+
+        win32gui.DeleteObject(saveBitMap.GetHandle())
+        saveDC.DeleteDC()
+        mfcDC.DeleteDC()
+        win32gui.ReleaseDC(self.render_hwnd, hwndDC)
+
+        if result != 1:
+            raise Exception("Failed to capture screen (PrintWindow failed).")
+
+        return img
+
+    def get_color_at_percent(self, img, x_pct, y_pct):
+        width, height = img.size
+        cx = int(width * x_pct / 100.0)
+        cy = int(height * y_pct / 100.0)
+        cx = max(0, min(cx, width - 1))
+        cy = max(0, min(cy, height - 1))
+        return img.getpixel((cx, cy))
+
+    def scan_environment(self, img):
+        import config
+        width, height = img.size
+        
+        start_x = int(width * config.SCAN_X_START / 100.0)
+        end_x = int(width * config.SCAN_X_END / 100.0)
+        start_x, end_x = max(0, min(start_x, width-1)), max(0, min(end_x, width-1))
+        if start_x > end_x: start_x, end_x = end_x, start_x
+        
+        y_head = max(0, min(int(height * config.SCAN_HEAD_Y / 100.0), height-1))
+        y_waist = max(0, min(int(height * config.SCAN_WAIST_Y / 100.0), height-1))
+        y_ground = max(0, min(int(height * config.SCAN_GROUND_Y / 100.0), height-1))
+        y_potato = max(0, min(int(height * config.SCAN_POTATO_Y / 100.0), height-1))
+        
+        black_cnt = 0
+        potato_cnt = 0
+        obs_head_cnt = 0
+        obs_waist_cnt = 0
+        
+        state = "SAFE"
+        
+        for x in range(start_x, end_x + 1):
+            # 1. เช็คพื้นล่างสุด (หลุมดำ)
+            r, g, b = img.getpixel((x, y_ground))
+            if r < 30 and g < 30 and b < 30:
+                black_cnt += 1
+            else:
+                black_cnt = 0
+                
+            # 1.5 เช็คระดับพื้น (ก้อนมันฝรั่ง และ มายองเนส)
+            pr, pg, pb = img.getpixel((x, y_potato))
+            is_potato = (config.POTATO_R_MIN <= pr <= config.POTATO_R_MAX and 
+                         config.POTATO_G_MIN <= pg <= config.POTATO_G_MAX and 
+                         config.POTATO_B_MIN <= pb <= config.POTATO_B_MAX)
+            is_mayo = (config.MAYO_R_MIN <= pr <= config.MAYO_R_MAX and 
+                       config.MAYO_G_MIN <= pg <= config.MAYO_G_MAX and 
+                       config.MAYO_B_MIN <= pb <= config.MAYO_B_MAX)
+            
+            if is_potato or is_mayo:
+                potato_cnt += 1
+            else:
+                potato_cnt = 0
+                
+            # 2. เช็คระดับหัว (หาสิ่งกีดขวางสีทึบ)
+            hr, hg, hb = img.getpixel((x, y_head))
+            if hr < 80 and hg < 80 and hb < 80:
+                obs_head_cnt += 1
+            else:
+                obs_head_cnt = 0
+                
+            # 3. เช็คระดับเอว
+            wr, wg, wb = img.getpixel((x, y_waist))
+            if wr < 80 and wg < 80 and wb < 80:
+                obs_waist_cnt += 1
+            else:
+                obs_waist_cnt = 0
+                
+            # ประเมินผลแบบ Real-time ทีละจุด
+            if potato_cnt >= config.POTATO_THRESHOLD:
+                return "POTATO_SKILL" # สำคัญสุด ให้กวาดเหรียญ
+            if black_cnt >= config.HOLE_WIDTH_THRESHOLD:
+                return "HOLE"
+            if obs_head_cnt >= config.OBSTACLE_THRESHOLD:
+                state = "OBSTACLE_HIGH"
+            if obs_waist_cnt >= config.OBSTACLE_THRESHOLD:
+                return "OBSTACLE_LOW" # ถ้ามีอันตรายข้างล่าง ต้องโดด สำคัญกว่าสไลด์
+                
+        return state
+
+    def ocr_read_text(self, img, rect_pct=None):
+        # [REMOVED] ถอดระบบ Tesseract OCR ออกทั้งหมดเพื่อแก้ปัญหาโปรแกรมแครช
+        # เนื่องจาก Tesseract ต้องติดตั้งโปรแกรมเสริมบน Windows ค่อนข้างวุ่นวาย
+        return ""
+
+    def has_get_sign(self, img, rect_pct):
+        # เลิกใช้ OCR
+        return False
+
+    def is_relay_window(self, img, rect_pct):
+        # เปลี่ยนไปเช็คสีปุ่ม "ผลัดไม้ (Relay)" สีเขียวตรงกลางจอแทน
+        width, height = img.size
+        rx, ry = int(width * 0.5), int(height * 0.6) # ตำแหน่งปุ่ม Relay ที่ตั้งไว้ (50%, 60%)
+        r, g, b = img.getpixel((rx, ry))
+        
+        # ปุ่มผลัดไม้มักจะเป็นสีเขียวสว่าง
+        is_green_button = (g > 150) and (r < g - 30) and (b < g - 30)
+        return is_green_button
+
+    def is_revive_window(self, img, rect_pct):
+        # เลิกใช้ OCR
+        return False
+        
+    def is_result_screen(self, img, rect_pct=None):
+        # 1. Fast Check: สแกนเพื่อหาปุ่ม OK (สีเขียว) และ Show Off (สีฟ้า)
+        width, height = img.size
+        
+        green_cnt = 0
+        blue_cnt = 0
+        
+        # สแกนปุ่ม OK (X = 30-50%) และ Show Off (X = 55-75%)
+        # สแกนหลายระดับความสูง (Y = 82%, 85%, 88%, 91%) ป้องกันพลาด!
+        for y_pct in [0.82, 0.85, 0.88, 0.91]:
+            y = int(height * y_pct)
+            
+            # Check Green (OK)
+            for x in range(int(width * 0.30), int(width * 0.50), 2): 
+                r, g, b = img.getpixel((x, y))
+                if g > 150 and r < g - 20 and b < g - 20:
+                    green_cnt += 1
+                    
+            # Check Blue (Show Off)
+            for x in range(int(width * 0.55), int(width * 0.75), 2):
+                r, g, b = img.getpixel((x, y))
+                if b > 140 and g > 100 and r < 120:
+                    blue_cnt += 1
+                    
+        # ต้องเจอทั้ง 2 ปุ่ม ถึงจะมั่นใจ 100% ว่าไม่ใช่แสงออร่าตอนวิ่ง
+        if green_cnt > 20 and blue_cnt > 20:
+            return True
+                
+        return False
+    def is_lobby_screen(self, img):
+        # สแกนหาปุ่ม Play! สีเขียวที่มุมขวาล่าง
+        width, height = img.size
+        green_cnt = 0
+        
+        # เช็คปุ่ม Play! สีเขียว (ช่วง X = 65% ถึง 85%)
+        for y_pct in [0.85, 0.88, 0.91]:
+            y = int(height * y_pct)
+            for x in range(int(width * 0.65), int(width * 0.85), 2):
+                r, g, b = img.getpixel((x, y))
+                # สีเขียวเด่นชัด (หลบแสงหลอก)
+                if g > 110 and g > r + 10 and g > b + 10:
+                    green_cnt += 1
+                    
+        # ต้องเจอปุ่ม Play สีเขียวขนาดใหญ่เท่านั้น (ป้องกันไปสับสนกับไอเทมสีเขียวชิ้นเล็กๆ ในหน้าต่างเพื่อน)
+        return green_cnt > 150
+
+    def is_center_popup_button(self, img):
+        # สแกนหาปุ่ม (ฟ้าอ่อน หรือ เขียว) ช่วงล่างของจอ (X=25-75%)
+        # ครอบคลุมทั้งปุ่มตรงกลาง (Open/Confirm) และปุ่มฝั่งซ้าย (Open All)
+        width, height = img.size
+        
+        blue_cnt = 0
+        green_cnt = 0
+        
+        for y_pct in [0.82, 0.85, 0.88, 0.91]:
+            y = int(height * y_pct)
+            
+            # Check Light Blue (X=25-75% ครอบคลุมปุ่ม Open All และ Confirm)
+            for x in range(int(width * 0.25), int(width * 0.75), 2):
+                r, g, b = img.getpixel((x, y))
+                if b > 140 and b > r + 20 and g > r + 10:
+                    blue_cnt += 1
+                    
+            # Check Green (สแกนแค่ X=35-45% เพื่อหลบซองจดหมายหัวใจเพื่อนที่ X=48-55%)
+            for x in range(int(width * 0.35), int(width * 0.45), 2):
+                r, g, b = img.getpixel((x, y))
+                if g > 130 and g > r + 10 and g > b + 10:
+                    green_cnt += 1
+                    
+        # เจอปุ่มใดปุ่มหนึ่งในตำแหน่งที่กำหนด ถือว่าเป็น Popup Box/Level Up
+        if blue_cnt > 40 or green_cnt > 40:
+            return True
+            
+        return False
+
+    def read_coins_result(self, img):
+        """อ่านจำนวนเหรียญที่ได้จากหน้า Result"""
+        try:
+            width, height = img.size
+            # คาดคะเนตำแหน่งของตัวเลขเหรียญ (ด้านขวาล่างของบอร์ด)
+            # ปรับให้แคบลงและชิดขวามากขึ้น (X=75-95%, Y=61-71%) เพื่อหลบไอคอนและไม่ให้ตัวเลขโดนตัด
+            crop_rect = (int(width*0.75), int(height*0.61), int(width*0.95), int(height*0.71))
+            coin_img = img.crop(crop_rect)
+            
+            # แปลงภาพเพื่อลด Noise
+            gray = cv2.cvtColor(np.array(coin_img), cv2.COLOR_RGB2GRAY)
+            
+            # ตัวอักษรสีน้ำตาลเข้มบนพื้นขาว ใช้ THRESH_BINARY เพื่อให้ตัวอักษรเป็นสีดำ และพื้นหลังเป็นสีขาว (Tesseract ชอบ)
+            _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+            
+            # Save debug image
+            cv2.imwrite("debug_coin.jpg", thresh)
+            
+            # ให้ Tesseract อ่านเฉพาะตัวเลข และเครื่องหมายคอมม่า
+            custom_config = r'--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789,'
+            text = pytesseract.image_to_string(thresh, config=custom_config)
+            
+            # กรองเอาเฉพาะตัวเลข
+            clean_number = "".join(filter(str.isdigit, text))
+            if clean_number:
+                return int(clean_number)
+            return 0
+        except Exception as e:
+            print(f"[OCR Coin Error] {e}")
+            return 0

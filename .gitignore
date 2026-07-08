@@ -1,0 +1,43 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+env.bak/
+venv.bak/
+.env
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Bot specific
+stats.json
+debug_coin.jpg
+test_coin_raw.jpg
+test_coin_thresh.jpg
+logs/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# OS
+.DS_Store
+Thumbs.db
