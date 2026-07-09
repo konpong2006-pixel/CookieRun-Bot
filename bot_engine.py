@@ -277,24 +277,12 @@ class CookieBot:
                             controller.click_percent(*PREP_START_GAME)
                             time.sleep(5) # รอโหลดเข้าด่าน
                             
-                        self.current_state = "WAIT_FOR_GAMEPLAY"
+                        self.current_state = "GAMEPLAY"
 
-                    elif self.current_state == "WAIT_FOR_GAMEPLAY":
-                        self.status_msg = "Loading... Spamming Fast Start"
-                        # รอโหลดเกมและกด Fast Start รัวๆ เป็นเวลา 12 วินาที
-                        for _ in range(6):
-                            if not self.running: break
-                            controller.click_percent(*GAME_FAST_START)
-                            time.sleep(2)
-                            
-                        self.status_msg = "Running in stage..."
+                    elif self.current_state == "GAMEPLAY":
                         self.run_start_time = time.time()
                         if hasattr(self, 'ai'):
                             self.ai.start_new_run()
-                            
-                        self.current_state = "GAMEPLAY"
-                        
-                    elif self.current_state == "GAMEPLAY":
                         
                         last_jump_time = time.time()
                         relay_used = False
@@ -332,16 +320,26 @@ class CookieBot:
                                     
                             # ป้องกันเผลอกดปุ่มซื้อเพชร (หน้าต่างชุบชีวิต) หรือเผลอกดตอนเกมค้าง
                             if static_frames > 5:
+                                # ถ้าพึ่งเริ่มเกม (ไม่เกิน 15 วินาที) แล้วภาพยังนิ่ง แปลว่าอยู่ในหน้าโหลด
+                                if time.time() - self.run_start_time < 15.0:
+                                    self.status_msg = "Loading... Spamming Fast Start"
+                                    controller.click_percent(*GAME_FAST_START)
+                                    time.sleep(1.0)
+                                    continue
+                                
                                 self.status_msg = "Screen paused/popup detected. Halting actions..."
                                 
-                                # ถ้าค้างนานเกิน 8 วินาที แปลว่าอยู่หน้าจบเกมแน่นอน ให้ออกจากลูป
+                                # ถ้าค้างนานเกิน 8 วินาที (และเล่นมาเกิน 20 วินาทีแล้ว) แปลว่าอยู่หน้าจบเกมแน่นอน
                                 if static_frames > 80:
-                                    self.status_msg = "Run completed. Result screen detected (Motion)!"
-                                    break
+                                    if time.time() - self.run_start_time > 20.0:
+                                        self.status_msg = "Run completed. Result screen detected (Motion)!"
+                                        break
                                     
                                 game_over_timer += 1
                                 time.sleep(0.1)
                                 continue
+                                
+                            self.status_msg = "Running in stage..."
                             
                             # เช็คปุ่มไม้ผลัด (ใช้ได้กับทุกโหมดถ้าเปิดใช้งาน)
                             if self.use_relay and not relay_used and vision.is_relay_window(img, RELAY_SCAN_AREA):
