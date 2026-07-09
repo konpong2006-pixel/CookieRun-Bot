@@ -521,9 +521,17 @@ class CookieBot:
                             controller.click_percent(50.0, 85.0)
                             time.sleep(3.5)
                         elif vision.is_lobby_screen(img):
-                            self.status_msg = "Lobby ready. Waiting for animations..."
-                            time.sleep(2.5) # รอให้อนิเมชั่นปุ่ม Play เลื่อนเข้ามาจนกดได้
-                            self.current_state = "LOBBY"
+                            self.status_msg = "Lobby ready. Checking for dropping boxes..."
+                            time.sleep(4.0) # รอให้กล่องหล่นลงมาจนเสร็จ (ถ้ามี)
+                            img_check = vision.capture_screen()
+                            if vision.is_center_popup_button(img_check):
+                                self.status_msg = "Box dropped after lobby! Clicking..."
+                                controller.click_percent(35.0, 85.0)
+                                time.sleep(1.5)
+                                controller.click_percent(50.0, 85.0)
+                                time.sleep(3.5)
+                            else:
+                                self.current_state = "LOBBY"
                         else:
                             self.status_msg = "Waiting for Lobby or Popups..."
                             time.sleep(1) # รอเฉยๆ อย่างปลอดภัย!
