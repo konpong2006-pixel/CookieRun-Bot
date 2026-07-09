@@ -136,10 +136,11 @@ class Vision:
 
     def is_relay_window(self, img, rect_pct):
         # Scan a box around the center where the green Relay button background is expected.
-        # Button is roughly between X: 40% - 60%, Y: 40% - 60%
         width, height = img.size
-        x1, y1 = int(width * 0.45), int(height * 0.45)
-        x2, y2 = int(width * 0.55), int(height * 0.55)
+        x1 = int(width * (rect_pct[0] / 100))
+        y1 = int(height * (rect_pct[1] / 100))
+        x2 = int(width * (rect_pct[2] / 100))
+        y2 = int(height * (rect_pct[3] / 100))
         
         green_count = 0
         total_pixels = 0

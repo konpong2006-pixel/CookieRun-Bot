@@ -58,7 +58,7 @@ MAYO_R_MIN, MAYO_R_MAX = 240, 255
 MAYO_G_MIN, MAYO_G_MAX = 240, 255
 MAYO_B_MIN, MAYO_B_MAX = 240, 255
 
-RELAY_SCAN_AREA = (40.0, 40.0, 60.0, 50.0) # พื้นที่สแกนหน้าเปลี่ยนไม้
+RELAY_SCAN_AREA = (40.0, 50.0, 60.0, 70.0) # สแกนบริเวณปุ่มไม้ผลัด (Y ประมาณ 60%)
 
 # 4. Results
 RESULT_OPEN_ALL = (50.0, 85.0)     # ตำแหน่งปุ่ม Open All ตรงกลางจอด้านล่าง
