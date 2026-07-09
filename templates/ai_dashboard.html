@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>CookieBot AI Evolution - ลูกพี่จะฉลาดขึ้น</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #fff; margin: 0; padding: 20px; }
+        h1 { color: #e94560; text-align: center; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .stats-box { background: #16213e; padding: 20px; border-radius: 10px; display: flex; justify-content: space-around; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #0f3460; text-shadow: 1px 1px 2px #fff; }
+        .stat-label { font-size: 14px; color: #ccc; }
+        .chart-container { background: #16213e; padding: 20px; border-radius: 10px; margin-bottom: 20px; height: 300px; }
+        .pattern-list { background: #16213e; padding: 20px; border-radius: 10px; max-height: 400px; overflow-y: auto; }
+        .pattern-item { padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        .action-jump { color: #4CAF50; font-weight: bold; }
+        .action-slide { color: #2196F3; font-weight: bold; }
+        .action-double { color: #FF9800; font-weight: bold; }
+        .nav { text-align: center; margin-bottom: 20px; }
+        .nav a { color: #fff; text-decoration: none; background: #e94560; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">← กลับหน้าควบคุมหลัก (Dashboard)</a>
+        </div>
+        <h1>🧠 ลูกพี่จะฉลาดขึ้น (AI Learning Progress)</h1>
+        
+        <div class="stats-box">
+            <div class="stat-item">
+                <div class="stat-value" id="val-runs">0</div>
+                <div class="stat-label">รอบที่ได้เรียนรู้ (Total Learned Runs)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="val-best">0.0s</div>
+                <div class="stat-label">เวลารอดชีวิตนานที่สุด (Best Duration)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="val-latest">0.0s</div>
+                <div class="stat-label">รอบล่าสุด (Latest Run)</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="evolutionChart"></canvas>
+        </div>
+
+        <h2>ความจำจากรอบล่าสุด (Latest Learned Pattern)</h2>
+        <div class="pattern-list" id="pattern-container">
+            <p style="text-align:center; color:#888;">กำลังรอข้อมูลการเรียนรู้...</p>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'เวลาที่รอดชีวิต (วินาที)',
+                        data: [],
+                        borderColor: '#e94560',
+                        backgroundColor: 'rgba(233, 69, 96, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#333' } },
+                        x: { grid: { color: '#333' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
+        async function updateStats() {
+            try {
+                const res = await fetch('/api/ai_stats');
+                const data = await res.json();
+                
+                document.getElementById('val-runs').innerText = data.total_learned;
+                document.getElementById('val-best').innerText = data.best_duration.toFixed(1) + 's';
+                
+                if(data.runs.length > 0) {
+                    const latest = data.runs[data.runs.length - 1];
+                    document.getElementById('val-latest').innerText = latest.duration.toFixed(1) + 's';
+                    
+                    // Update Chart
+                    chart.data.labels = data.runs.map((_, i) => 'รอบ ' + (i + 1));
+                    chart.data.datasets[0].data = data.runs.map(r => r.duration);
+                    chart.update();
+                    
+                    // Update Pattern
+                    const pContainer = document.getElementById('pattern-container');
+                    pContainer.innerHTML = '';
+                    
+                    if(data.latest_pattern.length === 0) {
+                        pContainer.innerHTML = '<p style="text-align:center; color:#888;">วิ่งรอบล่าสุดไม่มีการกดหลบหลีกเลย (อาจจะตายเร็ว)</p>';
+                    } else {
+                        data.latest_pattern.forEach(action => {
+                            const div = document.createElement('div');
+                            div.className = 'pattern-item';
+                            let actionHtml = '';
+                            if(action.action === "JUMP") actionHtml = '<span class="action-jump">กระโดด (JUMP)</span>';
+                            else if(action.action === "SLIDE") actionHtml = '<span class="action-slide">สไลด์ (SLIDE)</span>';
+                            else if(action.action === "DOUBLE_JUMP") actionHtml = '<span class="action-double">โดดคู่ (DOUBLE JUMP)</span>';
+                            else actionHtml = action.action;
+                            
+                            div.innerHTML = `<span>วินาทีที่ <strong>${action.time.toFixed(2)}</strong></span> ${actionHtml}`;
+                            pContainer.appendChild(div);
+                        });
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        initChart();
+        updateStats();
+        setInterval(updateStats, 2000);
+    </script>
+</body>
+</html>

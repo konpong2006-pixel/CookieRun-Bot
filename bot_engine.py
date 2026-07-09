@@ -7,6 +7,7 @@ from config import *
 from core.emulator import get_emulator_window, get_render_window
 from core.controller import Controller
 from core.vision import Vision
+from core.ai_learner import AILearner
 
 class CookieBot:
     def __init__(self):
@@ -25,6 +26,7 @@ class CookieBot:
         # ข้อมูลสำหรับ Screen Stream
         self.latest_frame_bytes = None
         self.run_history = []
+        self.ai = AILearner()
         self.session_stats = {
             "total_runs": 0,
             "total_box_runs": 0,
@@ -62,6 +64,21 @@ class CookieBot:
                 json.dump(data, f, ensure_ascii=False, indent=4)
         except Exception as e:
             print(f"Error saving stats: {e}")
+
+    def _do_jump(self, controller):
+        if hasattr(self, 'ai') and hasattr(self, 'run_start_time') and self.current_state == "GAMEPLAY":
+            self.ai.record_action("JUMP", time.time() - self.run_start_time)
+        controller.click_percent(*GAME_JUMP_BTN)
+
+    def _do_double_jump(self, controller):
+        if hasattr(self, 'ai') and hasattr(self, 'run_start_time') and self.current_state == "GAMEPLAY":
+            self.ai.record_action("DOUBLE_JUMP", time.time() - self.run_start_time)
+        controller.double_jump(GAME_JUMP_BTN)
+
+    def _do_slide(self, controller):
+        if hasattr(self, 'ai') and hasattr(self, 'run_start_time') and self.current_state == "GAMEPLAY":
+            self.ai.record_action("SLIDE", time.time() - self.run_start_time)
+        controller.click_percent(*GAME_SLIDE_BTN)
 
     def start(self, mode="COIN", use_relay=False):
         if not self.running:
@@ -275,7 +292,9 @@ class CookieBot:
                             time.sleep(2)
                             
                         self.status_msg = "Running in stage..."
-                        self.run_start_time = time.time() # <-- เริ่มจับเวลาตรงนี้! (หลังโหลดเสร็จ)
+                        self.run_start_time = time.time()
+                        if hasattr(self, 'ai'):
+                            self.ai.start_new_run()
                         
                         last_jump_time = time.time()
                         relay_used = False
@@ -293,8 +312,6 @@ class CookieBot:
                             img = vision.capture_screen()
                             
                             # [Hybrid Detection] ระบบที่ 2: Motion Detection (เช็คภาพจิ๋วมุมซ้ายบน)
-                            # มุมซ้ายบน (X=10-30%, Y=20-40%) เป็นพื้นหลังที่จะเลื่อนตลอดเวลาตอนวิ่ง
-                            # และจะนิ่งสนิท 100% ตอนหน้า Result (หลบอนิเมชั่นของกล่องสมบัติและตัวละคร)
                             w, h = img.size
                             thumb = list(img.crop((int(w*0.1), int(h*0.2), int(w*0.3), int(h*0.4))).resize((8, 8)).getdata())
                             if thumb == last_motion_thumb:
@@ -304,10 +321,14 @@ class CookieBot:
                                 last_motion_thumb = thumb
                                 
                             # เช็คหน้าจบเกมก่อนเป็นอันดับแรก (เช็คทุกๆ 3 วินาที)
-                            if game_over_timer % 30 == 0:
-                                if vision.is_result_screen(img):
-                                    self.status_msg = "Run completed. Result screen detected!"
-                                    break
+                            if vision.is_result_screen(img) or game_over_timer > 3:
+                                run_duration = time.time() - self.run_start_time
+                                self.status_msg = f"Game Over! Run lasted {run_duration:.1f}s."
+                                if hasattr(self, 'ai'):
+                                    self.ai.save_run(run_duration, self.farm_mode)
+                                time.sleep(1)
+                                self.current_state = "RESULTS"
+                                break
                                     
                             # ป้องกันเผลอกดปุ่มซื้อเพชร (หน้าต่างชุบชีวิต) หรือเผลอกดตอนเกมค้าง
                             if static_frames > 5:
@@ -337,31 +358,30 @@ class CookieBot:
                                 if env_state == "POTATO_SKILL":
                                     self.status_msg = "Potato Skill! Single Short Jump!"
                                     if time.time() - last_jump_time > 0.35:
-                                        controller.click_percent(*GAME_JUMP_BTN)
+                                        self._do_jump(controller)
                                         last_jump_time = time.time()
                                 elif env_state == "HOLE":
                                     self.status_msg = "Hole detected! Double Jump!"
-                                    controller.double_jump(GAME_JUMP_BTN)
+                                    self._do_double_jump(controller)
                                     last_jump_time = time.time()
                                     time.sleep(0.1)
                                 elif env_state == "OBSTACLE_LOW":
                                     self.status_msg = "Low Obstacle! Jump!"
-                                    controller.click_percent(*GAME_JUMP_BTN)
+                                    self._do_jump(controller)
                                     last_jump_time = time.time()
                                     time.sleep(0.1)
                                 elif env_state == "OBSTACLE_HIGH":
                                     self.status_msg = "High Obstacle! Slide!"
-                                    controller.click_percent(*GAME_SLIDE_BTN)
+                                    self._do_slide(controller)
                                     time.sleep(0.2)
                                 else:
                                     self.status_msg = f"Safe... ({self.coin_pattern})"
                                     if time.time() - last_jump_time > JUMP_INTERVAL:
                                         if self.coin_pattern == "AGILE_JUMPER":
-                                            # AGILE_JUMPER: ชอบกระโดดคู่ (Double Jump) ตอนทางโล่งเพื่อเก็บเยลลี่ลอยฟ้า หรือกระโดดสั้นๆ ถี่ๆ
                                             if random.random() > 0.5:
-                                                controller.double_jump(GAME_JUMP_BTN)
+                                                self._do_double_jump(controller)
                                             else:
-                                                controller.click_percent(*GAME_JUMP_BTN)
+                                                self._do_jump(controller)
                                         else:
                                             # SMART_SLIDER: ชอบสไลด์ติดพื้นยาวๆ เพื่อความปลอดภัยสูงสุด (มุดหลบสิ่งกีดขวางที่อาจจะมองไม่เห็น)
                                             if random.random() > 0.2:

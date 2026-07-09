@@ -29,6 +29,10 @@ CORS(app)
 def index():
     return render_template('index.html')
 
+@app.route('/ai')
+def ai_dashboard():
+    return render_template('ai_dashboard.html')
+
 @app.route('/api/stream')
 def stream_video():
     def generate():
@@ -64,6 +68,12 @@ def get_status():
     status = bot_instance.get_status()
     status["use_relay"] = getattr(bot_instance, "use_relay", False)
     return jsonify(status)
+
+@app.route('/api/ai_stats', methods=['GET'])
+def get_ai_stats():
+    if hasattr(bot_instance, 'ai'):
+        return jsonify(bot_instance.ai.get_stats())
+    return jsonify({"runs": [], "total_learned": 0, "best_duration": 0})
 
 @app.route('/api/settings', methods=['POST'])
 def update_settings():
