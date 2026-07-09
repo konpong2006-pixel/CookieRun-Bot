@@ -185,7 +185,7 @@ class Vision:
                     blue_cnt += 1
                     
         # ต้องเจอทั้ง 2 ปุ่ม ถึงจะมั่นใจ 100% ว่าไม่ใช่แสงออร่าตอนวิ่ง
-        if green_cnt > 20 and blue_cnt > 20:
+        if green_cnt > 50 and blue_cnt > 50:
             return True
                 
     def is_multi_button_popup(self, img):

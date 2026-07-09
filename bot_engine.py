@@ -308,16 +308,7 @@ class CookieBot:
                                 static_frames = 0
                                 last_motion_thumb = thumb
                                 
-                            # เช็คหน้าจบเกมก่อนเป็นอันดับแรก (เช็คทุกๆ 3 วินาที เพื่อประหยัด CPU)
-                            if (game_over_timer % 30 == 0 and vision.is_result_screen(img)) or vision.is_result_screen(img):
-                                run_duration = time.time() - self.run_start_time
-                                self.status_msg = f"Game Over! Run lasted {run_duration:.1f}s."
-                                if hasattr(self, 'ai'):
-                                    self.ai.save_run(run_duration, self.farm_mode)
-                                time.sleep(1)
-                                self.current_state = "RESULTS"
-                                break
-                                    
+
                             # ป้องกันเผลอกดปุ่มซื้อเพชร (หน้าต่างชุบชีวิต) หรือเผลอกดตอนเกมค้าง
                             if static_frames > 5:
                                 # ถ้าพึ่งเริ่มเกม (ไม่เกิน 15 วินาที) แล้วภาพยังนิ่ง แปลว่าอยู่ในหน้าโหลด
@@ -327,6 +318,17 @@ class CookieBot:
                                     time.sleep(1.0)
                                     continue
                                 
+                                # ตรวจสอบว่าเป็นหน้าจบเกมหรือไม่ (เช็คเฉพาะตอนภาพนิ่งเพื่อป้องกันการอ่านสีผิดพลาดตอนวิ่ง)
+                                if vision.is_result_screen(img):
+                                    run_duration = time.time() - self.run_start_time
+                                    self.status_msg = f"Game Over! Run lasted {run_duration:.1f}s."
+                                    if hasattr(self, 'ai'):
+                                        self.ai.save_run(run_duration, self.farm_mode)
+                                    time.sleep(1)
+                                    self.current_state = "RESULTS"
+                                    break
+                                
+
                                 self.status_msg = "Screen paused/popup detected. Halting actions..."
                                 
                                 # ถ้าค้างนานเกิน 8 วินาที (และเล่นมาเกิน 20 วินาทีแล้ว) แปลว่าอยู่หน้าจบเกมแน่นอน
