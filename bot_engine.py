@@ -237,11 +237,7 @@ class CookieBot:
                     elif self.current_state == "PREP":
                         time.sleep(2) # รอให้ UI หน้า Prep นิ่ง
                         
-                        img_prep = vision.capture_screen()
-                        if vision.is_lobby_screen(img_prep):
-                            print("Missed Play button, returning to LOBBY.")
-                            self.current_state = "LOBBY"
-                            continue
+                        # นำระบบเช็คว่าค้างอยู่หน้า Lobby ออก เพราะปุ่มมันเขียวและตำแหน่งเดียวกัน ทำให้บอทสับสนและกดเบิ้ล
                             
                         if self.farm_mode == "COIN":
                             self.status_msg = "Rolling Boosters (COIN Mode)..."
