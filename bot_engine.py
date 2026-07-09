@@ -328,6 +328,15 @@ class CookieBot:
                                     self.current_state = "RESULTS"
                                     break
                                 
+                                
+                                # เช็คปุ่มไม้ผลัด (ใช้ได้กับทุกโหมดถ้าเปิดใช้งาน)
+                                if self.use_relay and not relay_used and vision.is_relay_window(img, RELAY_SCAN_AREA):
+                                    self.status_msg = "Relaying to Cookie 2..."
+                                    controller.click_percent(*GAME_RELAY_COOKIE)
+                                    relay_used = True
+                                    static_frames = 0
+                                    time.sleep(2)
+                                    continue
 
                                 self.status_msg = "Screen paused/popup detected. Halting actions..."
                                 
@@ -343,14 +352,7 @@ class CookieBot:
                                 
                             self.status_msg = "Running in stage..."
                             
-                            # เช็คปุ่มไม้ผลัด (ใช้ได้กับทุกโหมดถ้าเปิดใช้งาน)
-                            if self.use_relay and not relay_used and vision.is_relay_window(img, RELAY_SCAN_AREA):
-                                self.status_msg = "Relaying to Cookie 2..."
-                                controller.click_percent(*GAME_RELAY_COOKIE)
-                                relay_used = True
-                                time.sleep(2)
-                                continue
-                                
+
                             if self.farm_mode == "COIN":
                                 # ระบบตาเลเซอร์สแกนสภาพแวดล้อม
                                 env_state = vision.scan_environment(img)
