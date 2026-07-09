@@ -305,8 +305,8 @@ class CookieBot:
                         static_frames = 0
                         
                         import random
-                        self.box_pattern = random.choice(["RABBIT_JUMP", "SNAKE_SLIDE"]) if self.farm_mode == "BOX" else None
-                        self.coin_pattern = random.choice(["AGILE_JUMPER", "SMART_SLIDER"]) if self.farm_mode == "COIN" else None
+                        self.box_pattern = random.choice(["RABBIT_JUMP", "SNAKE_SLIDE", "NINJA_DASH", "SAFE_GUARD"]) if self.farm_mode == "BOX" else None
+                        self.coin_pattern = random.choice(["AGILE_JUMPER", "SMART_SLIDER", "BALANCE_WALKER", "GROUND_LOVER"]) if self.farm_mode == "COIN" else None
                         
                         while self.running:
                             img = vision.capture_screen()
@@ -382,35 +382,61 @@ class CookieBot:
                                                 self._do_double_jump(controller)
                                             else:
                                                 self._do_jump(controller)
-                                        else:
-                                            # SMART_SLIDER: ชอบสไลด์ติดพื้นยาวๆ เพื่อความปลอดภัยสูงสุด (มุดหลบสิ่งกีดขวางที่อาจจะมองไม่เห็น)
+                                        elif self.coin_pattern == "SMART_SLIDER":
                                             if random.random() > 0.2:
-                                                controller.click_percent(*GAME_SLIDE_BTN)
-                                                time.sleep(0.3) # สไลด์ค้างไว้นิดนึง
+                                                self._do_slide(controller)
+                                                time.sleep(0.3)
                                             else:
-                                                controller.click_percent(*GAME_JUMP_BTN)
+                                                self._do_jump(controller)
+                                        elif self.coin_pattern == "BALANCE_WALKER":
+                                            r = random.random()
+                                            if r < 0.33:
+                                                self._do_double_jump(controller)
+                                            elif r < 0.66:
+                                                self._do_jump(controller)
+                                            else:
+                                                self._do_slide(controller)
+                                                time.sleep(0.2)
+                                        else: # GROUND_LOVER
+                                            if random.random() > 0.1:
+                                                self._do_slide(controller)
+                                                time.sleep(0.4)
+                                            else:
+                                                self._do_jump(controller)
                                         last_jump_time = time.time()
                             else:
-                                # BOX Mode: Anti-Macro Movements (สุ่มเดินแบบไม่ให้ซ้ำ)
+                                # BOX Mode: Anti-Macro Movements 
                                 if self.box_pattern == "RABBIT_JUMP":
-                                    # RABBIT_JUMP: กระโดดถี่ๆ กระโดดคู่บ้าง แทบไม่สไลด์เลย
                                     if time.time() - last_jump_time > random.uniform(1.0, 3.0):
                                         self.status_msg = "Anti-Macro (RABBIT_JUMP): Jump!"
                                         if random.random() > 0.7:
-                                            controller.double_jump(GAME_JUMP_BTN)
+                                            self._do_double_jump(controller)
                                         else:
-                                            controller.click_percent(*GAME_JUMP_BTN)
+                                            self._do_jump(controller)
                                         last_jump_time = time.time()
-                                else:
-                                    # SNAKE_SLIDE: สไลด์ค้างติดพื้นยาวๆ นานๆทีกระโดดที
+                                elif self.box_pattern == "SNAKE_SLIDE":
                                     if time.time() - last_jump_time > random.uniform(2.5, 5.0):
                                         if random.random() > 0.2:
                                             self.status_msg = "Anti-Macro (SNAKE_SLIDE): Slide!"
-                                            controller.click_percent(*GAME_SLIDE_BTN)
-                                            time.sleep(0.5) # สไลด์ค้าง
+                                            self._do_slide(controller)
+                                            time.sleep(0.5)
                                         else:
                                             self.status_msg = "Anti-Macro (SNAKE_SLIDE): Jump!"
-                                            controller.click_percent(*GAME_JUMP_BTN)
+                                            self._do_jump(controller)
+                                        last_jump_time = time.time()
+                                elif self.box_pattern == "NINJA_DASH":
+                                    if time.time() - last_jump_time > random.uniform(1.5, 3.0):
+                                        self.status_msg = "Anti-Macro (NINJA_DASH): Fast Jump!"
+                                        if random.random() > 0.2:
+                                            self._do_jump(controller)
+                                        else:
+                                            self._do_double_jump(controller)
+                                        last_jump_time = time.time()
+                                else: # SAFE_GUARD
+                                    if time.time() - last_jump_time > random.uniform(4.0, 7.0):
+                                        self.status_msg = "Anti-Macro (SAFE_GUARD): Safe Slide!"
+                                        self._do_slide(controller)
+                                        time.sleep(0.3)
                                         last_jump_time = time.time()
                                     
                             # เงื่อนไขออกจากลูป Gameplay ไปยัง Result
