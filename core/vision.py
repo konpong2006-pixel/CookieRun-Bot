@@ -176,7 +176,48 @@ class Vision:
         if green_cnt > 20 and blue_cnt > 20:
             return True
                 
-        return False
+    def is_multi_button_popup(self, img):
+        # สแกนหาปุ่ม Multi สีชมพู ภายใน Popup (X=84-89%, Y=29-31%)
+        width, height = img.size
+        pink_cnt = 0
+        
+        for y_pct in [0.29, 0.30, 0.31]:
+            y = int(height * y_pct)
+            for x in range(int(width * 0.84), int(width * 0.89), 1):
+                r, g, b = img.getpixel((x, y))
+                # สีชมพู/แดงสว่าง: R โดดเด่นกว่า G ชัดเจน
+                if r > 150 and r > g + 40:
+                    pink_cnt += 1
+                    
+        return pink_cnt > 10
+
+    def is_prep_screen(self, img):
+        # ต้องมีปุ่ม Play สีเขียว
+        if not self.is_lobby_screen(img):
+            return False
+            
+        # สแกนหากล่องสุ่ม Booster สีทอง/เหลือง (X=42-45%, Y=81-83%)
+        width, height = img.size
+        gold_cnt = 0
+        for y_pct in [0.81, 0.82, 0.83]:
+            y = int(height * y_pct)
+            for x_pct in [0.42, 0.43, 0.44]:
+                x = int(width * x_pct)
+                r, g, b = img.getpixel((x, y))
+                # สีทอง/เหลือง: R และ G สูง, B ต่ำ
+                if r > 150 and g > 100 and b < 100 and r > g:
+                    gold_cnt += 1
+        
+        # ถ้ามีสีทองตรงกล่องสุ่ม แปลว่าเป็นหน้า Prep (ถ้าเป็น Lobby จะเป็นกรอบเพื่อนสีทึบ)
+        return gold_cnt > 3
+        
+    def determine_state(self, img):
+        if self.is_result_screen(img):
+            return "RESULTS"
+        if self.is_lobby_screen(img):
+            return "LOBBY"
+        return "GAMEPLAY"
+
     def is_lobby_screen(self, img):
         # สแกนหาปุ่ม Play! สีเขียวที่มุมขวาล่าง
         width, height = img.size
@@ -228,8 +269,9 @@ class Vision:
         try:
             width, height = img.size
             # คาดคะเนตำแหน่งของตัวเลขเหรียญ (ด้านขวาล่างของบอร์ด)
-            # ปรับให้แคบลงและชิดขวามากขึ้น (X=75-95%, Y=61-71%) เพื่อหลบไอคอนและไม่ให้ตัวเลขโดนตัด
-            crop_rect = (int(width*0.75), int(height*0.61), int(width*0.95), int(height*0.71))
+            # คาดคะเนตำแหน่งของตัวเลขเหรียญ (ด้านขวาล่างของบอร์ด)
+            # ปรับให้แคบลงและชิดขวามากขึ้น (X=75-95%, Y=52-62%) เพื่อหลบไอคอนและไม่ให้ตัวเลขโดนตัด
+            crop_rect = (int(width*0.75), int(height*0.52), int(width*0.95), int(height*0.62))
             coin_img = img.crop(crop_rect)
             
             # แปลงภาพเพื่อลด Noise

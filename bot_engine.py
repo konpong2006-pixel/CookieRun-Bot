@@ -20,12 +20,15 @@ class CookieBot:
         self.coin_timeout = 205
         self.box_timeout = 150
         self.use_timeout = True
+        self.emulator_title = EMULATOR_WINDOW_TITLE
         
         # ข้อมูลสำหรับ Screen Stream
         self.latest_frame_bytes = None
         self.run_history = []
         self.session_stats = {
             "total_runs": 0,
+            "total_box_runs": 0,
+            "total_coin_runs": 0,
             "total_coins": 0
         }
         self._load_stats()
@@ -37,6 +40,8 @@ class CookieBot:
                 with open("stats.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
                     self.session_stats["total_runs"] = data.get("total_runs", 0)
+                    self.session_stats["total_box_runs"] = data.get("total_box_runs", 0)
+                    self.session_stats["total_coin_runs"] = data.get("total_coin_runs", 0)
                     self.session_stats["total_coins"] = data.get("total_coins", 0)
                     # Load history too if needed
                     history = data.get("run_history", [])
@@ -48,6 +53,8 @@ class CookieBot:
         try:
             data = {
                 "total_runs": self.session_stats["total_runs"],
+                "total_box_runs": self.session_stats.get("total_box_runs", 0),
+                "total_coin_runs": self.session_stats.get("total_coin_runs", 0),
                 "total_coins": self.session_stats["total_coins"],
                 "run_history": self.run_history
             }
@@ -56,10 +63,11 @@ class CookieBot:
         except Exception as e:
             print(f"Error saving stats: {e}")
 
-    def start(self, mode="COIN"):
+    def start(self, mode="COIN", use_relay=False):
         if not self.running:
             self.running = True
             self.farm_mode = mode
+            self.use_relay = use_relay
             self.current_state = "LOBBY"
             self.run_start_time = time.time()
             self.status_msg = f"Starting in {mode} mode..."
@@ -88,6 +96,7 @@ class CookieBot:
             "box_timeout": self.box_timeout,
             "use_timeout": self.use_timeout,
             "farm_mode": self.farm_mode,
+            "emulator_title": self.emulator_title,
             "box_pattern": getattr(self, 'box_pattern', None),
             "coin_pattern": getattr(self, 'coin_pattern', None),
             "run_history": self.run_history,
@@ -113,7 +122,7 @@ class CookieBot:
         while True:
             try:
                 if not local_vision:
-                    main_hwnd = get_emulator_window(EMULATOR_WINDOW_TITLE)
+                    main_hwnd = get_emulator_window(self.emulator_title)
                     render_hwnd = get_render_window(main_hwnd, EMULATOR_RENDER_CLASS, EMULATOR_RENDER_TITLE)
                     local_vision = Vision(render_hwnd)
                     
@@ -132,8 +141,8 @@ class CookieBot:
 
     def _run_loop(self):
         try:
-            self.status_msg = f"Searching for {EMULATOR_WINDOW_TITLE}..."
-            main_hwnd = get_emulator_window(EMULATOR_WINDOW_TITLE)
+            self.status_msg = f"Searching for {self.emulator_title}..."
+            main_hwnd = get_emulator_window(self.emulator_title)
             render_hwnd = get_render_window(main_hwnd, EMULATOR_RENDER_CLASS, EMULATOR_RENDER_TITLE)
             self.status_msg = "Found Emulator Viewport!"
 
@@ -147,11 +156,24 @@ class CookieBot:
                 try:
                     img = vision.capture_screen()
                     
-                    # --- Global Desync Recovery ---
-                    # หากบอทคิดว่ากำลังวิ่งอยู่ (GAMEPLAY) หรืออยู่หน้า Result แต่ดันตรวจพบปุ่ม Play! ของหน้าหลัก
-                    # แปลว่าเกิดการวืดกดไม่ติด หรือเกมเด้งกลับมาหน้าหลัก ให้ทำการรีเซ็ต State กลับไปเริ่มใหม่
-                    if self.current_state in ["GAMEPLAY", "RESULTS"]:
-                        if vision.is_lobby_screen(img):
+                    # --- Dynamic State Detection ---
+                    detected_state = vision.determine_state(img)
+                    
+                    if self.current_state in ["PREP", "WAIT_FOR_LOBBY"]:
+                        # ปิด auto-sync ระหว่างทำ Sequence ที่สำคัญ (เช่น สุ่มกล่อง, หรือ รอเปิดกล่อง)
+                        # ป้องกันปัญหาหน้าจอดำตอนโหลดแล้วระบบเข้าใจผิดว่าเป็น GAMEPLAY
+                        pass
+                    elif self.current_state != "GAMEPLAY":
+                        if detected_state in ["LOBBY", "RESULTS", "GAMEPLAY"]:
+                            # ป้องกันไม่ให้ State เปลี่ยนกลับไปกลับมาระหว่างรอโหลด
+                            if self.current_state != detected_state:
+                                self.status_msg = f"State auto-sync: {detected_state}"
+                            self.current_state = detected_state
+                    elif self.current_state == "GAMEPLAY":
+                        # --- Global Desync Recovery ---
+                        # หากบอทคิดว่ากำลังวิ่งอยู่ (GAMEPLAY) แต่ดันตรวจพบปุ่ม Play! ของหน้าหลัก
+                        # แปลว่าเกิดการวืดกดไม่ติด หรือเกมเด้งกลับมาหน้าหลัก ให้ทำการรีเซ็ต State กลับไปเริ่มใหม่
+                        if detected_state == "LOBBY":
                             self.status_msg = "Desync Detected! Force returning to LOBBY..."
                             global_static_frames = 0
                             self.current_state = "LOBBY"
@@ -184,7 +206,7 @@ class CookieBot:
                     if self.current_state == "LOBBY":
                         self.status_msg = "Checking Lobby status..."
                         
-                        if vision.has_get_sign(img, LOBBY_RELIC_GET_AREA):
+                        if self.farm_mode == "BOX_RELIC" and vision.has_get_sign(img, LOBBY_RELIC_GET_AREA):
                             self.status_msg = "Claiming relic..."
                             controller.click_percent(*LOBBY_RELIC_CLAIM)
                             time.sleep(2)
@@ -193,9 +215,8 @@ class CookieBot:
                         
                         self.status_msg = "Pressing Play..."
                         controller.click_percent(*LOBBY_PLAY_BTN)
-                        time.sleep(3) # รอหน้าต่าง Prep โหลด
+                        time.sleep(4.5) # รอหน้าต่าง Prep โหลดให้เสร็จสมบูรณ์
                         self.current_state = "PREP"
-
                     elif self.current_state == "PREP":
                         time.sleep(1) # รอให้ UI หน้า Prep นิ่ง
                         if self.farm_mode == "COIN":
@@ -203,7 +224,7 @@ class CookieBot:
                             
                             # 1. กดกล่องสุ่ม
                             controller.click_percent(*PREP_RANDOM_BOOST)
-                            time.sleep(1)
+                            time.sleep(1.5)
                             
                             # 2. กดปุ่ม Multi
                             controller.click_percent(*PREP_MULTI_TAB)
@@ -294,8 +315,8 @@ class CookieBot:
                                 time.sleep(0.1)
                                 continue
                             
-                            # ตรวจจับหน้าผลัดไม้ (ไม้ 1 ตาย)
-                            if self.farm_mode == "COIN" and not relay_used and vision.is_relay_window(img, RELAY_SCAN_AREA):
+                            # เช็คปุ่มไม้ผลัด (ใช้ได้กับทุกโหมดถ้าเปิดใช้งาน)
+                            if self.use_relay and not relay_used and vision.is_relay_window(img, RELAY_SCAN_AREA):
                                 self.status_msg = "Relaying to Cookie 2..."
                                 controller.click_percent(*GAME_RELAY_COOKIE)
                                 relay_used = True
@@ -437,30 +458,19 @@ class CookieBot:
                         self.status_msg = "Transitioning to Lobby..."
                         self.current_state = "WAIT_FOR_LOBBY"
                         
-                    elif self.current_state == "LOBBY":
-                        # ตรวจสอบอีกครั้งว่าอยู่หน้า Lobby จริงๆ ไหม (ป้องกันความผิดพลาด)
-                        if vision.is_lobby_screen(img):
-                            self.status_msg = "In Lobby. Navigating to Prep..."
-                            time.sleep(1)
-                            controller.click_percent(80.0, 85.0)
-                            time.sleep(0.5)
-                            controller.click_percent(80.0, 85.0) # กดย้ำอีกครั้งเผื่อเกมแลคหรือคลิกไม่ติด
-                            time.sleep(4) # รอ 4 วินาทีให้หน้าจอเลื่อนไป Prep จนเสร็จสมบูรณ์
-                            self.current_state = "PREP"
-                            
                     elif self.current_state == "WAIT_FOR_LOBBY":
-                        # ระบบนี้จะทำงานจนกว่าจะเห็นปุ่ม Play! สีเขียวในหน้า Lobby จริงๆ
-                        if vision.is_lobby_screen(img):
-                            self.status_msg = "Lobby detected! Waiting for UI animation..."
-                            time.sleep(4) # รอ 4 วินาทีให้ปุ่ม Play สไลด์เข้ามาจนสุดและ UI นิ่งสนิท
-                            self.current_state = "LOBBY"
-                        elif vision.is_center_popup_button(img):
+                        # ระบบนี้จะทำงานจนกว่าจะเห็นปุ่ม Play! สีเขียวในหน้า Lobby จริงๆ (เปลี่ยน state อัตโนมัติจาก Dynamic State)
+                        if vision.is_center_popup_button(img):
                             self.status_msg = "Popup/Box detected! Clicking..."
                             # กด 2 จุด: X=35 (เผื่อมีปุ่ม Open All โผล่มาฝั่งซ้าย) และ X=50 (ปุ่ม Confirm หรือ Open กล่องเดียวตรงกลาง)
                             controller.click_percent(35.0, 85.0)
                             time.sleep(1.5)
                             controller.click_percent(50.0, 85.0)
                             time.sleep(3.5)
+                        elif vision.is_lobby_screen(img):
+                            self.status_msg = "Lobby ready. Waiting for animations..."
+                            time.sleep(2.5) # รอให้อนิเมชั่นปุ่ม Play เลื่อนเข้ามาจนกดได้
+                            self.current_state = "LOBBY"
                         else:
                             self.status_msg = "Waiting for Lobby or Popups..."
                             time.sleep(1) # รอเฉยๆ อย่างปลอดภัย!

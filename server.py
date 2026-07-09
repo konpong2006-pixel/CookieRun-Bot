@@ -44,10 +44,11 @@ def stream_video():
 def start_bot():
     data = request.json
     mode = data.get('mode', 'COIN')
+    use_relay = data.get('use_relay', False)
     if bot_instance.running:
         return jsonify({"status": "error", "message": "Bot is already running!"}), 400
     
-    bot_instance.start(mode=mode)
+    bot_instance.start(mode=mode, use_relay=use_relay)
     return jsonify({"status": "success", "message": f"Started {mode} farm"})
 
 @app.route('/api/stop', methods=['POST'])
@@ -60,7 +61,9 @@ def stop_bot():
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
-    return jsonify(bot_instance.get_status())
+    status = bot_instance.get_status()
+    status["use_relay"] = getattr(bot_instance, "use_relay", False)
+    return jsonify(status)
 
 @app.route('/api/settings', methods=['POST'])
 def update_settings():
@@ -68,6 +71,8 @@ def update_settings():
     coin_timeout = data.get('coin_timeout')
     box_timeout = data.get('box_timeout')
     use_timeout = data.get('use_timeout')
+    use_relay = data.get('use_relay')
+    emulator_title = data.get('emulator_title')
     
     try:
         if coin_timeout:
@@ -76,6 +81,10 @@ def update_settings():
             bot_instance.box_timeout = int(box_timeout)
         if use_timeout is not None:
             bot_instance.use_timeout = bool(use_timeout)
+        if use_relay is not None:
+            bot_instance.use_relay = bool(use_relay)
+        if emulator_title:
+            bot_instance.emulator_title = emulator_title
     except ValueError:
         return jsonify({"status": "error", "message": "Invalid timeout value"}), 400
         

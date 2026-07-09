@@ -28,7 +28,7 @@ def main():
         width, height = img.size
         print(f"Captured screen size: {width}x{height}")
         
-        crop_rect = (int(width*0.75), int(height*0.61), int(width*0.95), int(height*0.71))
+        crop_rect = (int(width*0.75), int(height*0.52), int(width*0.95), int(height*0.62))
         coin_img = img.crop(crop_rect)
         coin_img.save("test_coin_raw.jpg")
         print("Saved raw crop to test_coin_raw.jpg")

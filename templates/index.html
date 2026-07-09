@@ -61,6 +61,14 @@
                 <div class="controls-panel glass">
                     <h3>⚙️ Settings</h3>
                     
+                    <h3 style="margin-top:20px;">Emulator</h3>
+                    <div class="settings-group" style="margin-top:10px;">
+                        <select id="select-emulator" class="btn" style="width:100%; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; outline: none; cursor: pointer;">
+                            <option value="Android Device" style="color: black;">MuMu Player</option>
+                            <option value="LDPlayer" style="color: black;">LDPlayer</option>
+                        </select>
+                    </div>
+                    
                     <h3 style="margin-top:20px;">Farm Mode</h3>
                     <div class="mode-selector">
                         <input type="radio" id="mode-coin" name="farm-mode" value="COIN" checked>
@@ -74,6 +82,12 @@
                             <div class="icon">🎁</div>
                             Mystery Box
                         </label>
+                        
+                        <input type="radio" id="mode-box-relic" name="farm-mode" value="BOX_RELIC">
+                        <label for="mode-box-relic" class="mode-btn box-relic-mode">
+                            <div class="icon">🏆</div>
+                            Auto Relic
+                        </label>
                     </div>
 
                     <div class="settings-group" style="margin-top:20px;">
@@ -84,6 +98,10 @@
                     </div>
 
                     <div id="coin-settings-group" class="settings-group" style="margin-top:10px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 10px;">
+                            <input type="checkbox" id="toggle-use-relay" style="width: 18px; height: 18px;">
+                            <span>ใช้ไม้ผลัด (Use Relay Cookie)</span>
+                        </label>
                         <label for="input-coin-timeout">Coin Farm Timer (วินาที)</label>
                         <div class="input-row">
                             <input type="number" id="input-coin-timeout" value="205">

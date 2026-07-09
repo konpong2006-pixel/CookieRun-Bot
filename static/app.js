@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const radioCoin = document.getElementById('mode-coin');
     const radioBox = document.getElementById('mode-box');
+    const radioBoxRelic = document.getElementById('mode-box-relic');
     
     let runsChart = null;
     function initChart() {
@@ -87,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             radioCoin.disabled = true;
             radioBox.disabled = true;
+            radioBoxRelic.disabled = true;
+            
+            const emulatorSelect = document.getElementById('select-emulator');
+            if (emulatorSelect) emulatorSelect.disabled = true;
         } else {
             statusText.innerText = "OFFLINE";
             statusText.style.color = "var(--text-main)";
@@ -99,6 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             radioCoin.disabled = false;
             radioBox.disabled = false;
+            radioBoxRelic.disabled = false;
+            
+            const emulatorSelect = document.getElementById('select-emulator');
+            if (emulatorSelect) emulatorSelect.disabled = false;
         }
 
         currentState.innerText = data.state;
@@ -227,6 +236,18 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleUseTimeout.checked = data.use_timeout;
             toggleUseTimeout.dataset.loaded = 'true';
         }
+        
+        const emulatorSelect = document.getElementById('select-emulator');
+        if (emulatorSelect && data.emulator_title && !emulatorSelect.dataset.loaded) {
+            emulatorSelect.value = data.emulator_title;
+            emulatorSelect.dataset.loaded = 'true';
+        }
+        
+        const toggleUseRelay = document.getElementById('toggle-use-relay');
+        if (toggleUseRelay && data.use_relay !== undefined && !toggleUseRelay.dataset.loaded) {
+            toggleUseRelay.checked = data.use_relay;
+            toggleUseRelay.dataset.loaded = 'true';
+        }
     }
     
     // Toggle Settings Visibility based on selected mode
@@ -245,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     radioCoin.addEventListener('change', updateSettingsVisibility);
     radioBox.addEventListener('change', updateSettingsVisibility);
+    radioBoxRelic.addEventListener('change', updateSettingsVisibility);
     updateSettingsVisibility(); // Set initial state
 
     // Save Settings logic
@@ -252,6 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const coinTimeoutVal = document.getElementById('input-coin-timeout').value;
         const boxTimeoutVal = document.getElementById('input-box-timeout').value;
         const useTimeoutVal = document.getElementById('toggle-use-timeout').checked;
+        const useRelayVal = document.getElementById('toggle-use-relay') ? document.getElementById('toggle-use-relay').checked : false;
+        const emulatorTitleVal = document.getElementById('select-emulator') ? document.getElementById('select-emulator').value : null;
         try {
             const res = await fetch('/api/settings', {
                 method: 'POST',
@@ -259,7 +283,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ 
                     coin_timeout: coinTimeoutVal,
                     box_timeout: boxTimeoutVal,
-                    use_timeout: useTimeoutVal
+                    use_timeout: useTimeoutVal,
+                    use_relay: useRelayVal,
+                    emulator_title: emulatorTitleVal
                 })
             });
             const data = await res.json();
@@ -282,6 +308,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleUseTimeout = document.getElementById('toggle-use-timeout');
     if (toggleUseTimeout) {
         toggleUseTimeout.addEventListener('change', () => {
+            saveSettings();
+        });
+    }
+    
+    const toggleUseRelay = document.getElementById('toggle-use-relay');
+    if (toggleUseRelay) {
+        toggleUseRelay.addEventListener('change', () => {
+            saveSettings();
+        });
+    }
+    
+    const selectEmulator = document.getElementById('select-emulator');
+    if (selectEmulator) {
+        selectEmulator.addEventListener('change', () => {
             saveSettings();
         });
     }
@@ -315,12 +355,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnStart.addEventListener('click', async () => {
-        const mode = radioCoin.checked ? 'COIN' : 'BOX';
+        const mode = document.querySelector('input[name="farm-mode"]:checked').value;
+        const useRelay = document.getElementById('toggle-use-relay') ? document.getElementById('toggle-use-relay').checked : false;
         try {
             const res = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode: mode })
+                body: JSON.stringify({ mode: mode, use_relay: useRelay })
             });
             const data = await res.json();
             if (data.status === 'success') {
