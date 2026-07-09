@@ -211,7 +211,7 @@ class CookieBot:
                             controller.click_percent(*LOBBY_RELIC_CLAIM)
                             time.sleep(2)
                             controller.click_percent(*LOBBY_RELIC_CLOSE)
-                            time.sleep(1)
+                            time.sleep(3) # เพิ่มเวลาเผื่ออนิเมชั่นปิดหน้าต่างนาน
                         
                         self.status_msg = "Pressing Play..."
                         controller.click_percent(*LOBBY_PLAY_BTN)
@@ -219,6 +219,13 @@ class CookieBot:
                         self.current_state = "PREP"
                     elif self.current_state == "PREP":
                         time.sleep(1) # รอให้ UI หน้า Prep นิ่ง
+                        
+                        # ป้องกันการกดโดนเพื่อน: ถ้าค้างอยู่หน้า Lobby (กด Play ไม่ติด) ให้กลับไป LOBBY
+                        if vision.is_lobby_screen(img):
+                            print("Missed Play button, returning to LOBBY.")
+                            self.current_state = "LOBBY"
+                            continue
+                            
                         if self.farm_mode == "COIN":
                             self.status_msg = "Rolling Boosters (COIN Mode)..."
                             
