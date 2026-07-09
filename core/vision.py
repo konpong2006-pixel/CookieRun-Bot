@@ -135,14 +135,25 @@ class Vision:
         return False
 
     def is_relay_window(self, img, rect_pct):
-        # เปลี่ยนไปเช็คสีปุ่ม "ผลัดไม้ (Relay)" สีเขียวตรงกลางจอแทน
+        # Scan a box around the center where the green Relay button background is expected.
+        # Button is roughly between X: 40% - 60%, Y: 40% - 60%
         width, height = img.size
-        rx, ry = int(width * 0.5), int(height * 0.6) # ตำแหน่งปุ่ม Relay ที่ตั้งไว้ (50%, 60%)
-        r, g, b = img.getpixel((rx, ry))
+        x1, y1 = int(width * 0.45), int(height * 0.45)
+        x2, y2 = int(width * 0.55), int(height * 0.55)
         
-        # ปุ่มผลัดไม้มักจะเป็นสีเขียวสว่าง
-        is_green_button = (g > 150) and (r < g - 30) and (b < g - 30)
-        return is_green_button
+        green_count = 0
+        total_pixels = 0
+        
+        for y in range(y1, y2, 5): # Check every 5th pixel for speed
+            for x in range(x1, x2, 5):
+                r, g, b = img.getpixel((x, y))
+                # ปุ่มไม้ผลัดจะเป็นสีเขียวสว่าง (Lime green)
+                if g > 150 and r < g - 30 and b < g - 30:
+                    green_count += 1
+                total_pixels += 1
+                
+        # If at least 15% of the sampled pixels are green, consider it the relay button
+        return total_pixels > 0 and (green_count / total_pixels) > 0.15
 
     def is_revive_window(self, img, rect_pct):
         # เลิกใช้ OCR
