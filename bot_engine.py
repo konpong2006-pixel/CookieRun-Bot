@@ -281,9 +281,9 @@ class CookieBot:
                             controller.click_percent(*PREP_START_GAME)
                             time.sleep(5) # รอโหลดเข้าด่าน
                             
-                        self.current_state = "GAMEPLAY"
+                        self.current_state = "WAIT_FOR_GAMEPLAY"
 
-                    elif self.current_state == "GAMEPLAY":
+                    elif self.current_state == "WAIT_FOR_GAMEPLAY":
                         self.status_msg = "Loading... Spamming Fast Start"
                         # รอโหลดเกมและกด Fast Start รัวๆ เป็นเวลา 12 วินาที
                         for _ in range(6):
@@ -295,6 +295,10 @@ class CookieBot:
                         self.run_start_time = time.time()
                         if hasattr(self, 'ai'):
                             self.ai.start_new_run()
+                            
+                        self.current_state = "GAMEPLAY"
+                        
+                    elif self.current_state == "GAMEPLAY":
                         
                         last_jump_time = time.time()
                         relay_used = False
