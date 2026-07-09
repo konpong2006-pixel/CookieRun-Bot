@@ -357,11 +357,12 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStart.addEventListener('click', async () => {
         const mode = document.querySelector('input[name="farm-mode"]:checked').value;
         const useRelay = document.getElementById('toggle-use-relay') ? document.getElementById('toggle-use-relay').checked : false;
+        const episode = document.getElementById('select-episode') ? document.getElementById('select-episode').value : 'ep1';
         try {
             const res = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode: mode, use_relay: useRelay })
+                body: JSON.stringify({ mode: mode, use_relay: useRelay, episode: episode })
             });
             const data = await res.json();
             if (data.status === 'success') {
@@ -373,6 +374,26 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Failed to start bot");
         }
     });
+
+    const btnResetAI = document.getElementById('btn-reset-ai');
+    if (btnResetAI) {
+        btnResetAI.addEventListener('click', async () => {
+            const episode = document.getElementById('select-episode') ? document.getElementById('select-episode').value : 'ep1';
+            if (confirm(`Are you sure you want to erase AI memory for ${episode}? This cannot be undone.`)) {
+                try {
+                    const res = await fetch('/api/reset_ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ episode: episode })
+                    });
+                    const data = await res.json();
+                    alert(data.message);
+                } catch (e) {
+                    alert("Failed to reset AI memory");
+                }
+            }
+        });
+    }
 
     btnStop.addEventListener('click', async () => {
         try {

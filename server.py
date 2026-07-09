@@ -49,11 +49,21 @@ def start_bot():
     data = request.json
     mode = data.get('mode', 'COIN')
     use_relay = data.get('use_relay', False)
+    episode = data.get('episode', 'ep1')
     if bot_instance.running:
         return jsonify({"status": "error", "message": "Bot is already running!"}), 400
     
-    bot_instance.start(mode=mode, use_relay=use_relay)
+    bot_instance.start(mode=mode, use_relay=use_relay, episode=episode)
     return jsonify({"status": "success", "message": f"Started {mode} farm"})
+
+@app.route('/api/reset_ai', methods=['POST'])
+def reset_ai():
+    data = request.json
+    episode = data.get('episode', 'ep1')
+    if hasattr(bot_instance, 'ai'):
+        bot_instance.ai.reset_memory(episode)
+        return jsonify({"status": "success", "message": f"AI memory for {episode} has been reset."})
+    return jsonify({"status": "error", "message": "AI module not found."}), 400
 
 @app.route('/api/stop', methods=['POST'])
 def stop_bot():

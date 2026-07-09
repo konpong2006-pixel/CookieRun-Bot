@@ -80,11 +80,12 @@ class CookieBot:
             self.ai.record_action("SLIDE", time.time() - self.run_start_time)
         controller.click_percent(*GAME_SLIDE_BTN)
 
-    def start(self, mode="COIN", use_relay=False):
+    def start(self, mode="COIN", use_relay=False, episode="ep1"):
         if not self.running:
             self.running = True
             self.farm_mode = mode
             self.use_relay = use_relay
+            self.episode = episode
             self.current_state = "LOBBY"
             self.run_start_time = time.time()
             self.status_msg = f"Starting in {mode} mode..."
@@ -323,7 +324,7 @@ class CookieBot:
                                     run_duration = time.time() - self.run_start_time
                                     self.status_msg = f"Game Over! Run lasted {run_duration:.1f}s."
                                     if hasattr(self, 'ai'):
-                                        self.ai.save_run(run_duration, self.farm_mode)
+                                        self.ai.save_run(run_duration, self.farm_mode, getattr(self, 'episode', 'ep1'))
                                     time.sleep(1)
                                     self.current_state = "RESULTS"
                                     break
@@ -351,6 +352,22 @@ class CookieBot:
                                 continue
                                 
                             self.status_msg = "Running in stage..."
+                            
+                            # ตรวจสอบ AI Danger Prediction
+                            if hasattr(self, 'ai'):
+                                run_duration = time.time() - self.run_start_time
+                                danger_action = self.ai.get_danger_action(run_duration, getattr(self, 'episode', 'ep1'))
+                                if danger_action:
+                                    self.status_msg = f"AI PREDICTED DANGER! EXECUTING {danger_action}"
+                                    if danger_action == "JUMP":
+                                        self._do_jump(controller)
+                                    elif danger_action == "DOUBLE_JUMP":
+                                        self._do_double_jump(controller)
+                                    elif danger_action == "SLIDE":
+                                        self._do_slide(controller)
+                                    time.sleep(0.1)
+                                    continue
+                            
                             
 
                             if self.farm_mode == "COIN":

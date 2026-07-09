@@ -65,6 +65,19 @@
                 <div class="controls-panel glass">
                     <h3>⚙️ Settings</h3>
                     
+                    <h3 style="margin-top:20px;">AI Learning Stage</h3>
+                    <div class="settings-group" style="margin-top:10px; display: flex; gap: 10px;">
+                        <select id="select-episode" class="btn" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; outline: none; cursor: pointer;">
+                            <option value="ep1" style="color: black;">Episode 1</option>
+                            <option value="ep2" style="color: black;">Episode 2</option>
+                            <option value="ep3" style="color: black;">Episode 3</option>
+                            <option value="ep4" style="color: black;">Episode 4</option>
+                            <option value="ep5" style="color: black;">Episode 5</option>
+                            <option value="special" style="color: black;">Special Episode</option>
+                        </select>
+                        <button id="btn-reset-ai" class="btn danger" style="padding: 10px 15px; border-radius: 8px; cursor: pointer;">Reset AI</button>
+                    </div>
+
                     <h3 style="margin-top:20px;">Emulator</h3>
                     <div class="settings-group" style="margin-top:10px;">
                         <select id="select-emulator" class="btn" style="width:100%; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; outline: none; cursor: pointer;">
