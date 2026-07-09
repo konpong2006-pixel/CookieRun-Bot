@@ -308,8 +308,8 @@ class CookieBot:
                                 static_frames = 0
                                 last_motion_thumb = thumb
                                 
-                            # เช็คหน้าจบเกมก่อนเป็นอันดับแรก (เช็คทุกๆ 3 วินาที)
-                            if vision.is_result_screen(img) or game_over_timer > 3:
+                            # เช็คหน้าจบเกมก่อนเป็นอันดับแรก (เช็คทุกๆ 3 วินาที เพื่อประหยัด CPU)
+                            if (game_over_timer % 30 == 0 and vision.is_result_screen(img)) or vision.is_result_screen(img):
                                 run_duration = time.time() - self.run_start_time
                                 self.status_msg = f"Game Over! Run lasted {run_duration:.1f}s."
                                 if hasattr(self, 'ai'):
