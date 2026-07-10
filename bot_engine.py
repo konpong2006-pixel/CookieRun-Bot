@@ -187,6 +187,16 @@ class CookieBot:
                 try:
                     img = vision.capture_screen()
                     
+                    # 0. Global Popup Override
+                    # ถ้าเจอหน้าต่าง Congratulations โผล่มาขวาง (ทำให้จอมืดลง) ให้ปิดทิ้งก่อนเลย
+                    if not getattr(self, 'in_game', False):
+                        if vision.is_congratulations_popup(img):
+                            self.status_msg = "Congratulations Popup detected! Closing..."
+                            controller.click_percent(50.0, 80.0)
+                            time.sleep(2.0)
+                            self.state_timer = 0
+                            continue
+                    
                     # --- Dynamic State Detection ---
                     detected_state = vision.determine_state(img)
                     
@@ -238,13 +248,6 @@ class CookieBot:
                     
                     if self.current_state == "LOBBY":
                         self.status_msg = "Checking Lobby status..."
-                        
-                        # ตรวจสอบและกดปิด Popup ตรงกลาง (เช่น Congratulations!) อย่างแม่นยำด้วย OCR
-                        if vision.is_congratulations_popup(img):
-                            self.status_msg = "Congratulations Popup detected! Closing..."
-                            controller.click_percent(50.0, 80.0)
-                            time.sleep(2.0)
-                            continue
                         
                         if self.farm_mode == "BOX_RELIC" and vision.has_get_sign(img, LOBBY_RELIC_GET_AREA):
                             self.status_msg = "Claiming relic..."
