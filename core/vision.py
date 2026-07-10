@@ -182,7 +182,8 @@ class Vision:
             
             custom_config = '--psm 7'
             if only_digits:
-                custom_config += ' -c tessedit_char_whitelist=0123456789'
+                # อนุญาตให้มีลูกน้ำและจุดด้วย เพื่อกัน Tesseract พยายามบีบให้ลูกน้ำเป็นตัวเลข
+                custom_config += ' -c tessedit_char_whitelist=0123456789,.'
                 
             text = pytesseract.image_to_string(thresh, config=custom_config)
             return text.strip()
@@ -191,8 +192,10 @@ class Vision:
             return ""
 
     def read_coins_result(self, img):
-        # ขยายกรอบให้อ่านครอบคลุม X=65% ถึง 90% และ Y=55% ถึง 68% (เผื่อจอแต่ละคนสัดส่วนไม่เท่ากัน)
-        text = self.ocr_read_text(img, rect_pct=(65.0, 55.0, 25.0, 13.0), only_digits=True)
+        # บีบกรอบ Y ให้แคบลง (Y=53% ถึง 60%) เพื่อไม่ให้ไปกวาดโดนบรรทัด XP ที่อยู่ด้านล่าง
+        text = self.ocr_read_text(img, rect_pct=(65.0, 53.0, 25.0, 7.0), only_digits=True)
+        # เผื่อหลุดมา 2 บรรทัด ให้เอาแค่บรรทัดแรก (บรรทัดเหรียญ)
+        text = text.split('\n')[0]
         nums = ''.join(filter(str.isdigit, text))
         if nums:
             return int(nums)
