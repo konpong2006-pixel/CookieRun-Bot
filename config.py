@@ -5,10 +5,10 @@ import os
 # ==========================================
 TESSERACT_CMD = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# สำหรับ MuMu Player ให้ใช้ค่าด้านล่างนี้ (หากหาไม่เจอ ลองเปลี่ยนชื่อเป็น MuMu Player X หรือเวอร์ชันที่คุณใช้)
-EMULATOR_WINDOW_TITLE = "Android Device"
-EMULATOR_RENDER_CLASS = "subWin"
-EMULATOR_RENDER_TITLE = "sub"
+# สำหรับ LDPlayer ให้ใช้ค่าด้านล่างนี้ 
+EMULATOR_WINDOW_TITLE = "LDPlayer"
+EMULATOR_RENDER_CLASS = "RenderWindow"
+EMULATOR_RENDER_TITLE = "TheRender"
 
 BASE_WIDTH = 1280
 BASE_HEIGHT = 720
