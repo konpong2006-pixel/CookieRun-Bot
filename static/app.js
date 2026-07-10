@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Timeout inputs removed
         
-        const toggleUseTimeout = document.getElementById('toggle-use-timeout');
+        const toggleUseTimeout = document.getElementById('toggle-use-fast-start');
         if (toggleUseTimeout && data.use_timeout !== undefined && !toggleUseTimeout.dataset.loaded) {
             toggleUseTimeout.checked = data.use_timeout;
             toggleUseTimeout.dataset.loaded = 'true';
@@ -259,7 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save Settings logic
     async function saveSettings() {
-        const useTimeoutVal = document.getElementById('toggle-use-timeout').checked;
+        const toggleEl = document.getElementById('toggle-use-fast-start');
+        const useTimeoutVal = toggleEl ? toggleEl.checked : false;
         const useRelayVal = document.getElementById('toggle-use-relay') ? document.getElementById('toggle-use-relay').checked : false;
         const emulatorTitleVal = document.getElementById('select-emulator') ? document.getElementById('select-emulator').value : null;
         try {
@@ -281,9 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save buttons for individual timeout settings removed
     
-    const toggleUseTimeout = document.getElementById('toggle-use-timeout');
-    if (toggleUseTimeout) {
-        toggleUseTimeout.addEventListener('change', () => {
+    const toggleUseTimeoutEl = document.getElementById('toggle-use-fast-start');
+    if (toggleUseTimeoutEl) {
+        toggleUseTimeoutEl.addEventListener('change', () => {
             saveSettings();
         });
     }
