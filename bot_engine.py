@@ -239,10 +239,6 @@ class CookieBot:
                     if self.current_state == "LOBBY":
                         self.status_msg = "Checking Lobby status..."
                         
-                        # กดกึ่งกลางหน้าจอ 1 ครั้งเสมอเมื่อเข้า Lobby เพื่อปิด Level Up Popup หรือ Daily Login
-                        controller.click_percent(50.0, 85.0)
-                        time.sleep(1.0)
-                        
                         if self.farm_mode == "BOX_RELIC" and vision.has_get_sign(img, LOBBY_RELIC_GET_AREA):
                             self.status_msg = "Claiming relic..."
                             controller.click_percent(*LOBBY_RELIC_CLAIM)
