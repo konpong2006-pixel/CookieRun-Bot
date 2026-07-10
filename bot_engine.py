@@ -202,12 +202,10 @@ class CookieBot:
                             self.current_state = detected_state
                     elif self.current_state == "GAMEPLAY":
                         # --- Global Desync Recovery ---
-                        # หากบอทคิดว่ากำลังวิ่งอยู่ (GAMEPLAY) แต่ดันตรวจพบปุ่ม Play! ของหน้าหลัก
-                        # หรือไปอยู่ในหน้าเตรียมตัว (PREP) ให้ทำการรีเซ็ต State กลับไปเริ่มใหม่
                         if detected_state in ["LOBBY", "PREP"]:
-                            self.status_msg = "Desync Detected! Force returning to LOBBY..."
+                            self.status_msg = f"Desync Detected! Force returning to {detected_state}..."
                             global_static_frames = 0
-                            self.current_state = "LOBBY"
+                            self.current_state = detected_state
                             time.sleep(2)
                             continue
                             
@@ -240,6 +238,8 @@ class CookieBot:
                         self.status_msg = "Checking Lobby status..."
                         
                         # กดกึ่งกลางหน้าจอ 1 ครั้งเสมอเมื่อเข้า Lobby เพื่อปิด Level Up Popup หรือ Daily Login
+                        controller.click_percent(50.0, 75.0)
+                        time.sleep(0.5)
                         controller.click_percent(50.0, 85.0)
                         time.sleep(1.0)
                         
@@ -262,11 +262,7 @@ class CookieBot:
                         time.sleep(2) # รอให้ UI หน้า Prep นิ่ง
                         
                         # นำระบบเช็คว่าค้างอยู่หน้า Lobby ออก เพราะปุ่มมันเขียวและตำแหน่งเดียวกัน ทำให้บอทสับสนและกดเบิ้ล
-                        
-                        # ปิด Popup ที่อาจจะค้างอยู่ก่อน
-                        controller.click_percent(90.0, 10.0)
-                        time.sleep(1)
-
+                            
                         if time.time() - getattr(self, 'last_booster_roll_time', 0) > 60:
                             self.status_msg = f"Rolling Boosters ({self.farm_mode} Mode)..."
                             
@@ -289,12 +285,6 @@ class CookieBot:
                             
                             self.last_booster_roll_time = time.time()
                             if not self.running: break
-                        
-                        # ปิด Popup กล่องสุ่มเผื่อมันยังค้างอยู่
-                        controller.click_percent(90.0, 10.0)
-                        time.sleep(1.5)
-                        controller.click_percent(90.0, 10.0)
-                        time.sleep(1.5)
                         
                         # 5. กด Stop เผื่อสุ่มไม่เจอ (ถ้าเจอแล้ว ปุ่มนี้คือ Play! จะเป็นการเริ่มเกมเลย)
                         self.status_msg = "Pressing Stop/Play..."
