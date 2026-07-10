@@ -147,13 +147,55 @@ class Vision:
                 
         return state
 
-    def ocr_read_text(self, img, rect_pct=None):
-        # [REMOVED] ถอดระบบ Tesseract OCR ออกทั้งหมดเพื่อแก้ปัญหาโปรแกรมแครช
-        # เนื่องจาก Tesseract ต้องติดตั้งโปรแกรมเสริมบน Windows ค่อนข้างวุ่นวาย
-        return ""
+    def ocr_read_text(self, img, rect_pct=None, only_digits=False):
+        try:
+            import pytesseract
+            import os
+            import cv2
+            import numpy as np
+            from config import TESSERACT_CMD
+            
+            if not os.path.exists(TESSERACT_CMD):
+                return ""
+                
+            pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
+            
+            if rect_pct:
+                w, h = img.size
+                x = int(rect_pct[0] * w / 100.0)
+                y = int(rect_pct[1] * h / 100.0)
+                rw = int(rect_pct[2] * w / 100.0)
+                rh = int(rect_pct[3] * h / 100.0)
+                img = img.crop((x, y, x + rw, y + rh))
+                
+            open_cv_image = np.array(img)
+            if len(open_cv_image.shape) == 3:
+                gray = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = open_cv_image
+                
+            # เพิ่มขนาดภาพ 2 เท่าช่วยให้ OCR อ่านง่ายขึ้น
+            gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+            
+            # ใช้ Otsu threshold
+            _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+            
+            custom_config = '--psm 7'
+            if only_digits:
+                custom_config += ' -c tessedit_char_whitelist=0123456789'
+                
+            text = pytesseract.image_to_string(thresh, config=custom_config)
+            return text.strip()
+        except Exception as e:
+            print(f"[OCR Error] {e}")
+            return ""
 
     def read_coins_result(self, img):
-        # ถอดระบบอ่านเหรียญด้วย OCR ออกชั่วคราวเพื่อเสถียรภาพของโปรแกรม
+        # ขยายกรอบให้อ่านครอบคลุม X=65% ถึง 90% และ Y=55% ถึง 68% (เผื่อจอแต่ละคนสัดส่วนไม่เท่ากัน)
+        text = self.ocr_read_text(img, rect_pct=(65.0, 55.0, 25.0, 13.0), only_digits=True)
+        nums = ''.join(filter(str.isdigit, text))
+        if nums:
+            return int(nums)
         return 0
 
     def extract_obstacle_features(self, img):
