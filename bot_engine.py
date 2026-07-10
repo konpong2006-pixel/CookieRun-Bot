@@ -149,8 +149,9 @@ class CookieBot:
                     buf = io.BytesIO()
                     img_small.save(buf, format='JPEG', quality=50)
                     self.latest_frame_bytes = buf.getvalue()
-            except Exception:
+            except Exception as e:
                 local_vision = None
+                print(f"[Screen Capture] Error: {e}")
             time.sleep(0.1)
 
     def _run_loop(self):

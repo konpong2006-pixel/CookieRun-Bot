@@ -4,10 +4,20 @@ def get_emulator_window(window_title):
     """
     ค้นหา Window หลักของ Emulator ด้วยชื่อ Title (เช่น LDPlayer)
     """
-    hwnd = win32gui.FindWindow(None, window_title)
-    if not hwnd:
-        raise Exception(f"ไม่พบหน้าต่าง Emulator: {window_title}")
+    matched_hwnds = []
+    def enum_windows_proc(hwnd, lParam):
+        if win32gui.IsWindowVisible(hwnd):
+            title = win32gui.GetWindowText(hwnd)
+            if window_title.lower() in title.lower():
+                matched_hwnds.append(hwnd)
+        return True
+
+    win32gui.EnumWindows(enum_windows_proc, None)
+
+    if not matched_hwnds:
+        raise Exception(f"ไม่พบหน้าต่าง Emulator ที่มีชื่อ: {window_title}")
         
+    hwnd = matched_hwnds[0]
     # บังคับปรับขนาดหน้าต่าง Emulator ให้เป็นสัดส่วน 16:9 เสมอ (1280x750 เผื่อพื้นที่ Title Bar)
     # เพื่อแก้ปัญหาหน้าจอโดนตัด/แหว่ง เมื่อผู้ใช้ย่อหน้าต่างหรือตั้งค่าผิด
     try:
