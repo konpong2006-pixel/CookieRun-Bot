@@ -4,10 +4,8 @@ import win32con
 import numpy as np
 import cv2
 from PIL import Image
-import pytesseract
-from config import TESSERACT_CMD, BASE_WIDTH, BASE_HEIGHT
+from config import BASE_WIDTH, BASE_HEIGHT
 
-pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
 
 class Vision:
     def __init__(self, render_hwnd):
@@ -344,34 +342,3 @@ class Vision:
             
         return False
 
-    def read_coins_result(self, img):
-        """อ่านจำนวนเหรียญที่ได้จากหน้า Result"""
-        try:
-            width, height = img.size
-            # คาดคะเนตำแหน่งของตัวเลขเหรียญ (ด้านขวาล่างของบอร์ด)
-            # คาดคะเนตำแหน่งของตัวเลขเหรียญ (ด้านขวาล่างของบอร์ด)
-            # ปรับให้แคบลงและชิดขวามากขึ้น (X=75-95%, Y=52-62%) เพื่อหลบไอคอนและไม่ให้ตัวเลขโดนตัด
-            crop_rect = (int(width*0.75), int(height*0.52), int(width*0.95), int(height*0.62))
-            coin_img = img.crop(crop_rect)
-            
-            # แปลงภาพเพื่อลด Noise
-            gray = cv2.cvtColor(np.array(coin_img), cv2.COLOR_RGB2GRAY)
-            
-            # ตัวอักษรสีน้ำตาลเข้มบนพื้นขาว ใช้ THRESH_BINARY เพื่อให้ตัวอักษรเป็นสีดำ และพื้นหลังเป็นสีขาว (Tesseract ชอบ)
-            _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-            
-            # Save debug image
-            cv2.imwrite("debug_coin.jpg", thresh)
-            
-            # ให้ Tesseract อ่านเฉพาะตัวเลข และเครื่องหมายคอมม่า
-            custom_config = r'--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789,'
-            text = pytesseract.image_to_string(thresh, config=custom_config)
-            
-            # กรองเอาเฉพาะตัวเลข
-            clean_number = "".join(filter(str.isdigit, text))
-            if clean_number:
-                return int(clean_number)
-            return 0
-        except Exception as e:
-            print(f"[OCR Coin Error] {e}")
-            return 0
