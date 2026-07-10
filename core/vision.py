@@ -27,6 +27,7 @@ class Vision:
         saveDC.SelectObject(saveBitMap)
 
         import ctypes
+        # Try flag 3 (PW_CLIENTONLY | PW_RENDERFULLCONTENT)
         result = ctypes.windll.user32.PrintWindow(self.render_hwnd, saveDC.GetSafeHdc(), 3)
 
         bmpinfo = saveBitMap.GetInfo()
@@ -38,13 +39,26 @@ class Vision:
             bmpstr, 'raw', 'BGRX', 0, 1
         )
 
+        # Fallback: หากภาพดำสนิทหรือ PrintWindow ล้มเหลว ให้ลองใช้ flag 0 (Default)
+        if result != 1 or img.getbbox() is None:
+            saveDC.SelectObject(saveBitMap)
+            result = ctypes.windll.user32.PrintWindow(self.render_hwnd, saveDC.GetSafeHdc(), 0)
+            if result == 1:
+                bmpstr = saveBitMap.GetBitmapBits(True)
+                img = Image.frombuffer(
+                    'RGB',
+                    (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+                    bmpstr, 'raw', 'BGRX', 0, 1
+                )
+
         win32gui.DeleteObject(saveBitMap.GetHandle())
         saveDC.DeleteDC()
         mfcDC.DeleteDC()
         win32gui.ReleaseDC(self.render_hwnd, hwndDC)
 
-        if result != 1:
-            raise Exception("Failed to capture screen (PrintWindow failed).")
+        # หากภาพยังคงดำสนิท
+        if img.getbbox() is None:
+            raise Exception("Failed to capture screen (Image is black).")
 
         return img
 
