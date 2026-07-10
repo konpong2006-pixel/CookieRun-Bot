@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const btnStart = document.getElementById('btn-start');
     const btnStop = document.getElementById('btn-stop');
+    const btnShutdown = document.getElementById('btn-shutdown');
     const statusDot = document.getElementById('status-dot');
     const statusText = document.getElementById('status-text');
     const currentState = document.getElementById('current-state');
@@ -357,12 +358,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStart.addEventListener('click', async () => {
         const mode = document.querySelector('input[name="farm-mode"]:checked').value;
         const useRelay = document.getElementById('toggle-use-relay') ? document.getElementById('toggle-use-relay').checked : false;
+        const useFastStart = document.getElementById('toggle-use-fast-start') ? document.getElementById('toggle-use-fast-start').checked : false;
         const episode = document.getElementById('select-episode') ? document.getElementById('select-episode').value : 'ep1';
         try {
             const res = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode: mode, use_relay: useRelay, episode: episode })
+                body: JSON.stringify({ mode: mode, use_relay: useRelay, use_fast_start: useFastStart, episode: episode })
             });
             const data = await res.json();
             if (data.status === 'success') {
@@ -410,4 +412,24 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Failed to stop bot");
         }
     });
+
+    if (btnShutdown) {
+        btnShutdown.addEventListener('click', async () => {
+            if (confirm("คุณต้องการปิดโปรแกรมบอท (ปิด exe) ใช่หรือไม่?")) {
+                try {
+                    statusMessage.innerText = "กำลังปิดโปรแกรม... กรุณารอสักครู่";
+                    statusText.innerText = "SHUTTING DOWN";
+                    statusDot.className = "dot offline";
+                    btnStart.disabled = true;
+                    btnStop.disabled = true;
+                    btnShutdown.disabled = true;
+                    
+                    await fetch('/api/shutdown', { method: 'POST' });
+                    alert("ปิดบอทเรียบร้อยแล้ว! คุณสามารถปิดหน้านี้ได้เลย");
+                } catch (e) {
+                    alert("ปิดโปรแกรมเรียบร้อยแล้ว (การเชื่อมต่อขาดหาย)");
+                }
+            }
+        });
+    }
 });

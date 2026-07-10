@@ -80,11 +80,12 @@ class CookieBot:
             self.ai.record_action("SLIDE", time.time() - self.run_start_time)
         controller.click_percent(*GAME_SLIDE_BTN)
 
-    def start(self, mode="COIN", use_relay=False, episode="ep1"):
+    def start(self, mode="COIN", use_relay=False, use_fast_start=False, episode="ep1"):
         if not self.running:
             self.running = True
             self.farm_mode = mode
             self.use_relay = use_relay
+            self.use_fast_start = use_fast_start
             self.episode = episode
             self.current_state = "LOBBY"
             self.run_start_time = time.time()
@@ -228,6 +229,10 @@ class CookieBot:
                             self.status_msg = "Claiming relic..."
                             controller.click_percent(*LOBBY_RELIC_CLAIM)
                             time.sleep(2)
+                            controller.click_percent(*POPUP_RELIC_CLAIM_BTN)
+                            time.sleep(2)
+                            controller.click_percent(*POPUP_RELIC_CLAIM_BTN)
+                            time.sleep(2)
                             controller.click_percent(*LOBBY_RELIC_CLOSE)
                             time.sleep(3)
                         
@@ -240,43 +245,34 @@ class CookieBot:
                         
                         # นำระบบเช็คว่าค้างอยู่หน้า Lobby ออก เพราะปุ่มมันเขียวและตำแหน่งเดียวกัน ทำให้บอทสับสนและกดเบิ้ล
                             
-                        if self.farm_mode == "COIN":
-                            self.status_msg = "Rolling Boosters (COIN Mode)..."
-                            
-                            # 1. กดกล่องสุ่ม
-                            controller.click_percent(*PREP_RANDOM_BOOST)
-                            time.sleep(1.5)
-                            
-                            # 2. กดปุ่ม Multi
-                            controller.click_percent(*PREP_MULTI_TAB)
-                            time.sleep(1)
-                            
-                            # 3. กด Multi-Buy ใน Popup
-                            controller.click_percent(*PREP_MULTI_BUY)
-                            
-                            # 4. รอให้ระบบสุ่มอัตโนมัติ 20 วินาที
-                            self.status_msg = "Waiting 20 seconds for Auto Multi-Buy..."
-                            for _ in range(20):
-                                if not self.running: break
-                                time.sleep(1)
+                        self.status_msg = f"Rolling Boosters ({self.farm_mode} Mode)..."
+                        
+                        # 1. กดกล่องสุ่ม
+                        controller.click_percent(*PREP_RANDOM_BOOST)
+                        time.sleep(1.5)
+                        
+                        # 2. กดปุ่ม Multi
+                        controller.click_percent(*PREP_MULTI_TAB)
+                        time.sleep(1)
+                        
+                        # 3. กด Multi-Buy ใน Popup
+                        controller.click_percent(*PREP_MULTI_BUY)
+                        
+                        # 4. รอให้ระบบสุ่มอัตโนมัติ 30 วินาที
+                        self.status_msg = "Waiting 30 seconds for Auto Multi-Buy..."
+                        for _ in range(30):
                             if not self.running: break
-                            
-                            # 5. กด Stop เผื่อสุ่มไม่เจอ (ถ้าเจอแล้ว ปุ่มนี้คือ Play! จะเป็นการเริ่มเกมเลย)
-                            self.status_msg = "Pressing Stop/Play..."
-                            controller.click_percent(*PREP_START_GAME)
-                            time.sleep(2)
-                            
-                            # 6. กด Play! ซ้ำอีกรอบเพื่อความชัวร์ (เผื่อเมื่อกี้เป็นการกด Stop)
-                            controller.click_percent(*PREP_START_GAME)
-                            time.sleep(2)
-                        else:
-                            # BOX Mode ไม่ต้องสุ่ม เริ่มเกม
-                            self.status_msg = "Starting Game..."
-                            controller.click_percent(*PREP_START_GAME)
                             time.sleep(1)
-                            # กดย้ำอีกทีเพื่อความชัวร์ เผื่อดีเลย์
-                            controller.click_percent(*PREP_START_GAME)
-                            time.sleep(5) # รอโหลดเข้าด่าน
+                        if not self.running: break
+                        
+                        # 5. กด Stop เผื่อสุ่มไม่เจอ (ถ้าเจอแล้ว ปุ่มนี้คือ Play! จะเป็นการเริ่มเกมเลย)
+                        self.status_msg = "Pressing Stop/Play..."
+                        controller.click_percent(*PREP_START_GAME)
+                        time.sleep(2)
+                        
+                        # 6. กด Play! ซ้ำอีกรอบเพื่อความชัวร์ (เผื่อเมื่อกี้เป็นการกด Stop)
+                        controller.click_percent(*PREP_START_GAME)
+                        time.sleep(2)
                             
                         self.current_state = "GAMEPLAY"
 
@@ -288,6 +284,7 @@ class CookieBot:
                         last_jump_time = time.time()
                         relay_used = False
                         game_over_timer = 0
+                        last_middle_click_time = time.time()
                         
                         # ตัวแปรจับความเคลื่อนไหว
                         last_motion_thumb = None
@@ -314,9 +311,8 @@ class CookieBot:
                             if static_frames > 5:
                                 # ถ้าพึ่งเริ่มเกม (ไม่เกิน 15 วินาที) แล้วภาพยังนิ่ง แปลว่าอยู่ในหน้าโหลด
                                 if time.time() - self.run_start_time < 15.0:
-                                    self.status_msg = "Loading... Spamming Fast Start"
-                                    controller.click_percent(*GAME_FAST_START)
-                                    time.sleep(1.0)
+                                    self.status_msg = "Loading..."
+                                    time.sleep(0.5)
                                     continue
                                 
                                 # ตรวจสอบว่าเป็นหน้าจบเกมหรือไม่ (เช็คเฉพาะตอนภาพนิ่งเพื่อป้องกันการอ่านสีผิดพลาดตอนวิ่ง)
@@ -333,7 +329,10 @@ class CookieBot:
                                 # เช็คปุ่มไม้ผลัด (ใช้ได้กับทุกโหมดถ้าเปิดใช้งาน)
                                 if self.use_relay and not relay_used and vision.is_relay_window(img, RELAY_SCAN_AREA):
                                     self.status_msg = "Relaying to Cookie 2..."
+                                    time.sleep(1.0) # รอให้ปุ่มแสดงผลจนจบอนิเมชั่น
                                     controller.click_percent(*GAME_RELAY_COOKIE)
+                                    time.sleep(0.5)
+                                    controller.click_percent(*GAME_RELAY_COOKIE) # กดย้ำอีกครั้งเพื่อความชัวร์
                                     relay_used = True
                                     static_frames = 0
                                     time.sleep(2)
@@ -345,6 +344,7 @@ class CookieBot:
                                 if static_frames > 80:
                                     if time.time() - self.run_start_time > 20.0:
                                         self.status_msg = "Run completed. Result screen detected (Motion)!"
+                                        self.current_state = "RESULTS"
                                         break
                                     
                                 game_over_timer += 1
@@ -352,6 +352,14 @@ class CookieBot:
                                 continue
                                 
                             self.status_msg = "Running in stage..."
+                            
+                            time_in_run = time.time() - self.run_start_time
+                            if getattr(self, 'use_fast_start', False) and time_in_run < 5.0:
+                                controller.click_percent(50.0, 50.0)
+                            else:
+                                if time.time() - last_middle_click_time >= 3.5:
+                                    controller.click_percent(50.0, 50.0)
+                                    last_middle_click_time = time.time()
                             
                             # ตรวจสอบ AI Danger Prediction
                             if hasattr(self, 'ai'):
@@ -462,15 +470,24 @@ class CookieBot:
                             # บังคับจบเกมตามเวลาที่ตั้งค่าไว้ (Timer)
                             if self.use_timeout and hasattr(self, 'run_start_time') and self.run_start_time:
                                 current_run_time = time.time() - self.run_start_time
-                                current_timeout = self.coin_timeout if self.farm_mode == "COIN" else self.box_timeout
-                                if current_run_time > current_timeout:
-                                    self.status_msg = f"Time Limit Reached ({current_timeout}s). Forcing Result!"
-                                    break
+                                if self.farm_mode in ["BOX", "BOX_RELIC"]:
+                                    current_timeout = self.box_timeout
+                                    if current_run_time > current_timeout:
+                                        self.status_msg = f"Time Limit Reached ({current_timeout}s). Forcing Result!"
+                                        self.current_state = "RESULTS"
+                                        break
+                                else:
+                                    current_timeout = self.coin_timeout
+                                    if current_run_time > current_timeout:
+                                        self.status_msg = f"Time Limit Reached ({current_timeout}s). Forcing Result!"
+                                        self.current_state = "RESULTS"
+                                        break
                             
                             # (ย้ายส่วนตรวจสอบ Result ไปไว้ด้านบนแล้ว)
                             
                             if static_frames > 80:  # ถ้านิ่งสนิทนาน 8 วินาที แปลว่าอยู่หน้าจบเกมแน่นอน
                                 self.status_msg = "Run completed. Result screen detected (Motion)!"
+                                self.current_state = "RESULTS"
                                 break
                                 
                             game_over_timer += 1
@@ -538,7 +555,7 @@ class CookieBot:
                             controller.click_percent(35.0, 85.0)
                             time.sleep(1.5)
                             controller.click_percent(50.0, 85.0)
-                            time.sleep(3.5)
+                            time.sleep(5.5)
                         elif vision.is_lobby_screen(img):
                             self.status_msg = "Lobby ready. Checking for dropping boxes..."
                             time.sleep(4.0) # รอให้กล่องหล่นลงมาจนเสร็จ (ถ้ามี)
@@ -548,7 +565,7 @@ class CookieBot:
                                 controller.click_percent(35.0, 85.0)
                                 time.sleep(1.5)
                                 controller.click_percent(50.0, 85.0)
-                                time.sleep(3.5)
+                                time.sleep(5.5)
                             else:
                                 self.current_state = "LOBBY"
                         else:

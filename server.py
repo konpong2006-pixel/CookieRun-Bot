@@ -49,11 +49,12 @@ def start_bot():
     data = request.json
     mode = data.get('mode', 'COIN')
     use_relay = data.get('use_relay', False)
+    use_fast_start = data.get('use_fast_start', False)
     episode = data.get('episode', 'ep1')
     if bot_instance.running:
         return jsonify({"status": "error", "message": "Bot is already running!"}), 400
     
-    bot_instance.start(mode=mode, use_relay=use_relay, episode=episode)
+    bot_instance.start(mode=mode, use_relay=use_relay, use_fast_start=use_fast_start, episode=episode)
     return jsonify({"status": "success", "message": f"Started {mode} farm"})
 
 @app.route('/api/reset_ai', methods=['POST'])
@@ -72,6 +73,18 @@ def stop_bot():
     
     bot_instance.stop()
     return jsonify({"status": "success", "message": "Bot stopped"})
+
+@app.route('/api/shutdown', methods=['POST'])
+def shutdown_server():
+    if bot_instance.running:
+        bot_instance.stop()
+    
+    def kill_server():
+        time.sleep(1.0)
+        os._exit(0)
+        
+    threading.Thread(target=kill_server).start()
+    return jsonify({"status": "success", "message": "Server shutting down..."})
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
