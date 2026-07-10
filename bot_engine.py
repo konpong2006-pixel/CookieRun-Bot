@@ -202,10 +202,12 @@ class CookieBot:
                             self.current_state = detected_state
                     elif self.current_state == "GAMEPLAY":
                         # --- Global Desync Recovery ---
-                        if detected_state in ["LOBBY", "PREP"]:
-                            self.status_msg = f"Desync Detected! Force returning to {detected_state}..."
+                        # หากบอทคิดว่ากำลังวิ่งอยู่ (GAMEPLAY) แต่ดันตรวจพบปุ่ม Play! ของหน้าหลัก
+                        # แปลว่าเกิดการวืดกดไม่ติด หรือเกมเด้งกลับมาหน้าหลัก ให้ทำการรีเซ็ต State กลับไปเริ่มใหม่
+                        if detected_state == "LOBBY":
+                            self.status_msg = "Desync Detected! Force returning to LOBBY..."
                             global_static_frames = 0
-                            self.current_state = detected_state
+                            self.current_state = "LOBBY"
                             time.sleep(2)
                             continue
                             
@@ -238,8 +240,6 @@ class CookieBot:
                         self.status_msg = "Checking Lobby status..."
                         
                         # กดกึ่งกลางหน้าจอ 1 ครั้งเสมอเมื่อเข้า Lobby เพื่อปิด Level Up Popup หรือ Daily Login
-                        controller.click_percent(50.0, 75.0)
-                        time.sleep(0.5)
                         controller.click_percent(50.0, 85.0)
                         time.sleep(1.0)
                         
@@ -263,28 +263,25 @@ class CookieBot:
                         
                         # นำระบบเช็คว่าค้างอยู่หน้า Lobby ออก เพราะปุ่มมันเขียวและตำแหน่งเดียวกัน ทำให้บอทสับสนและกดเบิ้ล
                             
-                        if time.time() - getattr(self, 'last_booster_roll_time', 0) > 60:
-                            self.status_msg = f"Rolling Boosters ({self.farm_mode} Mode)..."
-                            
-                            # 1. กดกล่องสุ่ม
-                            controller.click_percent(*PREP_RANDOM_BOOST)
-                            time.sleep(1.5)
-                            
-                            # 2. กดปุ่ม Multi
-                            controller.click_percent(*PREP_MULTI_TAB)
-                            time.sleep(1)
-                            
-                            # 3. กด Multi-Buy ใน Popup
-                            controller.click_percent(*PREP_MULTI_BUY)
-                            
-                            # 4. รอให้ระบบสุ่มอัตโนมัติ 15 วินาที
-                            self.status_msg = "Waiting 15 seconds for Auto Multi-Buy..."
-                            for _ in range(15):
-                                if not self.running: break
-                                time.sleep(1)
-                            
-                            self.last_booster_roll_time = time.time()
+                        self.status_msg = f"Rolling Boosters ({self.farm_mode} Mode)..."
+                        
+                        # 1. กดกล่องสุ่ม
+                        controller.click_percent(*PREP_RANDOM_BOOST)
+                        time.sleep(1.5)
+                        
+                        # 2. กดปุ่ม Multi
+                        controller.click_percent(*PREP_MULTI_TAB)
+                        time.sleep(1)
+                        
+                        # 3. กด Multi-Buy ใน Popup
+                        controller.click_percent(*PREP_MULTI_BUY)
+                        
+                        # 4. รอให้ระบบสุ่มอัตโนมัติ 30 วินาที
+                        self.status_msg = "Waiting 30 seconds for Auto Multi-Buy..."
+                        for _ in range(30):
                             if not self.running: break
+                            time.sleep(1)
+                        if not self.running: break
                         
                         # 5. กด Stop เผื่อสุ่มไม่เจอ (ถ้าเจอแล้ว ปุ่มนี้คือ Play! จะเป็นการเริ่มเกมเลย)
                         self.status_msg = "Pressing Stop/Play..."
