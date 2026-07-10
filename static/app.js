@@ -220,17 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        const coinTimeoutInput = document.getElementById('input-coin-timeout');
-        if (coinTimeoutInput && data.coin_timeout && !coinTimeoutInput.dataset.loaded) {
-            coinTimeoutInput.value = data.coin_timeout;
-            coinTimeoutInput.dataset.loaded = 'true';
-        }
-        
-        const boxTimeoutInput = document.getElementById('input-box-timeout');
-        if (boxTimeoutInput && data.box_timeout && !boxTimeoutInput.dataset.loaded) {
-            boxTimeoutInput.value = data.box_timeout;
-            boxTimeoutInput.dataset.loaded = 'true';
-        }
+        // Timeout inputs removed
         
         const toggleUseTimeout = document.getElementById('toggle-use-timeout');
         if (toggleUseTimeout && data.use_timeout !== undefined && !toggleUseTimeout.dataset.loaded) {
@@ -253,15 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Toggle Settings Visibility based on selected mode
     const coinSettingsGroup = document.getElementById('coin-settings-group');
-    const boxSettingsGroup = document.getElementById('box-settings-group');
     
     function updateSettingsVisibility() {
         if (radioCoin.checked) {
-            coinSettingsGroup.style.display = 'block';
-            boxSettingsGroup.style.display = 'none';
+            if (coinSettingsGroup) coinSettingsGroup.style.display = 'block';
         } else {
-            coinSettingsGroup.style.display = 'none';
-            boxSettingsGroup.style.display = 'block';
+            if (coinSettingsGroup) coinSettingsGroup.style.display = 'none';
         }
     }
     
@@ -272,8 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save Settings logic
     async function saveSettings() {
-        const coinTimeoutVal = document.getElementById('input-coin-timeout').value;
-        const boxTimeoutVal = document.getElementById('input-box-timeout').value;
         const useTimeoutVal = document.getElementById('toggle-use-timeout').checked;
         const useRelayVal = document.getElementById('toggle-use-relay') ? document.getElementById('toggle-use-relay').checked : false;
         const emulatorTitleVal = document.getElementById('select-emulator') ? document.getElementById('select-emulator').value : null;
@@ -282,8 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    coin_timeout: coinTimeoutVal,
-                    box_timeout: boxTimeoutVal,
                     use_timeout: useTimeoutVal,
                     use_relay: useRelayVal,
                     emulator_title: emulatorTitleVal
@@ -296,15 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const btnSaveCoinSettings = document.getElementById('btn-save-coin-settings');
-    if (btnSaveCoinSettings) {
-        btnSaveCoinSettings.addEventListener('click', saveSettings);
-    }
-    
-    const btnSaveBoxSettings = document.getElementById('btn-save-box-settings');
-    if (btnSaveBoxSettings) {
-        btnSaveBoxSettings.addEventListener('click', saveSettings);
-    }
+    // Save buttons for individual timeout settings removed
     
     const toggleUseTimeout = document.getElementById('toggle-use-timeout');
     if (toggleUseTimeout) {

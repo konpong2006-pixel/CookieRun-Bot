@@ -66,18 +66,12 @@ class CookieBot:
             print(f"Error saving stats: {e}")
 
     def _do_jump(self, controller):
-        if hasattr(self, 'ai') and hasattr(self, 'run_start_time') and self.current_state == "GAMEPLAY":
-            self.ai.record_action("JUMP", time.time() - self.run_start_time)
         controller.click_percent(*GAME_JUMP_BTN)
 
     def _do_double_jump(self, controller):
-        if hasattr(self, 'ai') and hasattr(self, 'run_start_time') and self.current_state == "GAMEPLAY":
-            self.ai.record_action("DOUBLE_JUMP", time.time() - self.run_start_time)
         controller.double_jump(GAME_JUMP_BTN)
 
     def _do_slide(self, controller):
-        if hasattr(self, 'ai') and hasattr(self, 'run_start_time') and self.current_state == "GAMEPLAY":
-            self.ai.record_action("SLIDE", time.time() - self.run_start_time)
         controller.click_percent(*GAME_SLIDE_BTN)
 
     def start(self, mode="COIN", use_relay=False, use_fast_start=False, episode="ep1"):
@@ -88,6 +82,7 @@ class CookieBot:
             self.use_fast_start = use_fast_start
             self.episode = episode
             self.current_state = "LOBBY"
+            self.ai = AILearner(game_mode=self.farm_mode)
             self.run_start_time = time.time()
             self.status_msg = f"Starting in {mode} mode..."
             self.thread = threading.Thread(target=self._run_loop, daemon=True)
@@ -320,7 +315,7 @@ class CookieBot:
                                     run_duration = time.time() - self.run_start_time
                                     self.status_msg = f"Game Over! Run lasted {run_duration:.1f}s."
                                     if hasattr(self, 'ai'):
-                                        self.ai.save_run(run_duration, self.farm_mode, getattr(self, 'episode', 'ep1'))
+                                        self.ai.on_death(time.time())
                                     time.sleep(1)
                                     self.current_state = "RESULTS"
                                     break
@@ -344,6 +339,8 @@ class CookieBot:
                                 if static_frames > 80:
                                     if time.time() - self.run_start_time > 20.0:
                                         self.status_msg = "Run completed. Result screen detected (Motion)!"
+                                        if hasattr(self, 'ai'):
+                                            self.ai.on_death(time.time())
                                         self.current_state = "RESULTS"
                                         break
                                     
@@ -361,44 +358,56 @@ class CookieBot:
                                     controller.click_percent(50.0, 50.0)
                                     last_middle_click_time = time.time()
                             
-                            # ตรวจสอบ AI Danger Prediction
-                            if hasattr(self, 'ai'):
-                                run_duration = time.time() - self.run_start_time
-                                danger_action = self.ai.get_danger_action(run_duration, getattr(self, 'episode', 'ep1'))
-                                if danger_action:
-                                    self.status_msg = f"AI PREDICTED DANGER! EXECUTING {danger_action}"
+                            # Extract AI Features
+                            current_features = vision.extract_obstacle_features(img)
+                            current_action = "IDLE"
+                            
+                            # ตรวจสอบ AI Danger Prediction V2
+                            ai_overridden = False
+                            if hasattr(self, 'ai') and current_features is not None:
+                                prediction = self.ai.predict_danger(current_features)
+                                if prediction and prediction["confidence"] >= 0.80:
+                                    ai_overridden = True
+                                    danger_action = prediction["action"]
+                                    self.status_msg = f"[AI] {prediction['confidence']*100:.0f}% MATCH -> {danger_action}"
+                                    
+                                    current_action = danger_action
                                     if danger_action == "JUMP":
                                         self._do_jump(controller)
+                                        last_jump_time = time.time()
                                     elif danger_action == "DOUBLE_JUMP":
                                         self._do_double_jump(controller)
+                                        last_jump_time = time.time()
                                     elif danger_action == "SLIDE":
                                         self._do_slide(controller)
+                                        
                                     time.sleep(0.1)
-                                    continue
-                            
-                            
-
-                            if self.farm_mode == "COIN":
-                                # ระบบตาเลเซอร์สแกนสภาพแวดล้อม
+                                    
+                            if not ai_overridden and self.farm_mode == "COIN":
+                                # ระบบตาเลเซอร์สแกนสภาพแวดล้อม (Fallback)
                                 env_state = vision.scan_environment(img)
                                 
                                 if env_state == "POTATO_SKILL":
                                     self.status_msg = "Potato Skill! Single Short Jump!"
                                     if time.time() - last_jump_time > 0.35:
+                                        current_action = "JUMP"
                                         self._do_jump(controller)
                                         last_jump_time = time.time()
                                 elif env_state == "HOLE":
                                     self.status_msg = "Hole detected! Double Jump!"
+                                    current_action = "DOUBLE_JUMP"
                                     self._do_double_jump(controller)
                                     last_jump_time = time.time()
                                     time.sleep(0.1)
                                 elif env_state == "OBSTACLE_LOW":
                                     self.status_msg = "Low Obstacle! Jump!"
+                                    current_action = "JUMP"
                                     self._do_jump(controller)
                                     last_jump_time = time.time()
                                     time.sleep(0.1)
                                 elif env_state == "OBSTACLE_HIGH":
                                     self.status_msg = "High Obstacle! Slide!"
+                                    current_action = "SLIDE"
                                     self._do_slide(controller)
                                     time.sleep(0.2)
                                 else:
@@ -406,65 +415,83 @@ class CookieBot:
                                     if time.time() - last_jump_time > JUMP_INTERVAL:
                                         if self.coin_pattern == "AGILE_JUMPER":
                                             if random.random() > 0.5:
+                                                current_action = "DOUBLE_JUMP"
                                                 self._do_double_jump(controller)
                                             else:
+                                                current_action = "JUMP"
                                                 self._do_jump(controller)
                                         elif self.coin_pattern == "SMART_SLIDER":
                                             if random.random() > 0.2:
+                                                current_action = "SLIDE"
                                                 self._do_slide(controller)
                                                 time.sleep(0.3)
                                             else:
+                                                current_action = "JUMP"
                                                 self._do_jump(controller)
                                         elif self.coin_pattern == "BALANCE_WALKER":
                                             r = random.random()
                                             if r < 0.33:
+                                                current_action = "DOUBLE_JUMP"
                                                 self._do_double_jump(controller)
                                             elif r < 0.66:
+                                                current_action = "JUMP"
                                                 self._do_jump(controller)
                                             else:
+                                                current_action = "SLIDE"
                                                 self._do_slide(controller)
                                                 time.sleep(0.2)
                                         else: # GROUND_LOVER
                                             if random.random() > 0.1:
+                                                current_action = "SLIDE"
                                                 self._do_slide(controller)
                                                 time.sleep(0.4)
                                             else:
+                                                current_action = "JUMP"
                                                 self._do_jump(controller)
-                                        last_jump_time = time.time()
-                            else:
+                            elif not ai_overridden:
                                 # BOX Mode: Anti-Macro Movements 
                                 if self.box_pattern == "RABBIT_JUMP":
                                     if time.time() - last_jump_time > random.uniform(1.0, 3.0):
                                         self.status_msg = "Anti-Macro (RABBIT_JUMP): Jump!"
                                         if random.random() > 0.7:
+                                            current_action = "DOUBLE_JUMP"
                                             self._do_double_jump(controller)
                                         else:
+                                            current_action = "JUMP"
                                             self._do_jump(controller)
                                         last_jump_time = time.time()
                                 elif self.box_pattern == "SNAKE_SLIDE":
                                     if time.time() - last_jump_time > random.uniform(2.5, 5.0):
                                         if random.random() > 0.2:
                                             self.status_msg = "Anti-Macro (SNAKE_SLIDE): Slide!"
+                                            current_action = "SLIDE"
                                             self._do_slide(controller)
                                             time.sleep(0.5)
                                         else:
                                             self.status_msg = "Anti-Macro (SNAKE_SLIDE): Jump!"
+                                            current_action = "JUMP"
                                             self._do_jump(controller)
                                         last_jump_time = time.time()
                                 elif self.box_pattern == "NINJA_DASH":
                                     if time.time() - last_jump_time > random.uniform(1.5, 3.0):
                                         self.status_msg = "Anti-Macro (NINJA_DASH): Fast Jump!"
                                         if random.random() > 0.2:
+                                            current_action = "JUMP"
                                             self._do_jump(controller)
                                         else:
+                                            current_action = "DOUBLE_JUMP"
                                             self._do_double_jump(controller)
                                         last_jump_time = time.time()
                                 else: # SAFE_GUARD
                                     if time.time() - last_jump_time > random.uniform(4.0, 7.0):
                                         self.status_msg = "Anti-Macro (SAFE_GUARD): Safe Slide!"
+                                        current_action = "SLIDE"
                                         self._do_slide(controller)
                                         time.sleep(0.3)
                                         last_jump_time = time.time()
+                                        
+                            if hasattr(self, 'ai'):
+                                self.ai.add_frame(time.time(), current_features, current_action)
                                     
                             # เงื่อนไขออกจากลูป Gameplay ไปยัง Result
                             # บังคับจบเกมตามเวลาที่ตั้งค่าไว้ (Timer)

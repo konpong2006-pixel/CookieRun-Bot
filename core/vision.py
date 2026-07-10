@@ -130,6 +130,50 @@ class Vision:
         # เนื่องจาก Tesseract ต้องติดตั้งโปรแกรมเสริมบน Windows ค่อนข้างวุ่นวาย
         return ""
 
+    def extract_obstacle_features(self, img):
+        """Extract multi-scale features from ROI for AI learning."""
+        width, height = img.size
+        
+        # Crop ROI: X=15% to 45%, Y=40% to 90% (directly in front of Cookie)
+        x1 = int(width * 0.15)
+        x2 = int(width * 0.45)
+        y1 = int(height * 0.40)
+        y2 = int(height * 0.90)
+        
+        roi = img.crop((x1, y1, x2, y2))
+        roi_np = np.array(roi)
+        
+        # Convert to grayscale
+        gray = cv2.cvtColor(roi_np, cv2.COLOR_RGB2GRAY)
+        
+        # 1. Level 1: Direct Pixel (20x20)
+        resized_gray = cv2.resize(gray, (20, 20))
+        pixel_features = resized_gray.flatten().astype(np.float32) / 255.0  # Normalize to [0, 1]
+        
+        # 2. Level 2: HOG (Edge Detection)
+        # Resize to standard size for HOG (e.g. 32x64)
+        hog_img = cv2.resize(gray, (32, 64))
+        
+        # Initialize HOG descriptor with small cell/block sizes
+        winSize = (32, 64)
+        blockSize = (16, 16)
+        blockStride = (8, 8)
+        cellSize = (8, 8)
+        nbins = 9
+        
+        # Create HOG descriptor
+        hog = cv2.HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins)
+        hog_features = hog.compute(hog_img).flatten()
+        
+        # Normalize HOG features (they are usually already normalized per block, but just to be safe)
+        if np.max(hog_features) > 0:
+            hog_features = hog_features / np.max(hog_features)
+            
+        # Combine both vectors
+        combined_features = np.concatenate((pixel_features, hog_features))
+        
+        return combined_features
+
     def has_get_sign(self, img, rect_pct):
         # เลิกใช้ OCR
         return False
