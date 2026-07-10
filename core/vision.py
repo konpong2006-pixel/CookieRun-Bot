@@ -152,6 +152,10 @@ class Vision:
         # เนื่องจาก Tesseract ต้องติดตั้งโปรแกรมเสริมบน Windows ค่อนข้างวุ่นวาย
         return ""
 
+    def read_coins_result(self, img):
+        # ถอดระบบอ่านเหรียญด้วย OCR ออกชั่วคราวเพื่อเสถียรภาพของโปรแกรม
+        return 0
+
     def extract_obstacle_features(self, img):
         """Extract multi-scale features from ROI for AI learning."""
         width, height = img.size
