@@ -239,6 +239,13 @@ class CookieBot:
                     if self.current_state == "LOBBY":
                         self.status_msg = "Checking Lobby status..."
                         
+                        # ตรวจสอบและกดปิด Popup ตรงกลาง (เช่น Congratulations!)
+                        if vision.is_center_popup_button(img):
+                            self.status_msg = "Lobby Popup detected! Closing..."
+                            controller.click_percent(50.0, 80.0)
+                            time.sleep(2.0)
+                            continue
+                        
                         if self.farm_mode == "BOX_RELIC" and vision.has_get_sign(img, LOBBY_RELIC_GET_AREA):
                             self.status_msg = "Claiming relic..."
                             controller.click_percent(*LOBBY_RELIC_CLAIM)
