@@ -239,9 +239,9 @@ class CookieBot:
                     if self.current_state == "LOBBY":
                         self.status_msg = "Checking Lobby status..."
                         
-                        # ตรวจสอบและกดปิด Popup ตรงกลาง (เช่น Congratulations!)
-                        if vision.is_center_popup_button(img):
-                            self.status_msg = "Lobby Popup detected! Closing..."
+                        # ตรวจสอบและกดปิด Popup ตรงกลาง (เช่น Congratulations!) อย่างแม่นยำด้วย OCR
+                        if vision.is_congratulations_popup(img):
+                            self.status_msg = "Congratulations Popup detected! Closing..."
                             controller.click_percent(50.0, 80.0)
                             time.sleep(2.0)
                             continue

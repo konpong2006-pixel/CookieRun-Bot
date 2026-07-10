@@ -362,6 +362,24 @@ class Vision:
         # ต้องเจอปุ่ม Play สีเขียวขนาดใหญ่เท่านั้น (ป้องกันไปสับสนกับไอเทมสีเขียวชิ้นเล็กๆ ในหน้าต่างเพื่อน)
         return green_cnt > 150
 
+
+    def is_congratulations_popup(self, img):
+        # 1. เช็คปุ่ม Confirm สีเขียวตรงกลางก่อน (แบบเร็ว ไม่กิน CPU)
+        if not self.is_center_popup_button(img):
+            return False
+            
+        # 2. ถ้าเจอปุ่มเขียว ค่อยใช้ OCR อ่านคำว่า Congratulations! (เพื่อความชัวร์ 100%)
+        # ตำแหน่งของคำว่า Congratulations! อยู่ประมาณ Y=5% ถึง 25%, X=20% ถึง 80%
+        # rect_pct คือ (x, y, width, height)
+        rect = (20.0, 5.0, 60.0, 20.0)
+        text = self.ocr_read_text(img, rect_pct=rect)
+        if text:
+            text_lower = text.lower()
+            if "congrat" in text_lower or "challenge" in text_lower or "run" in text_lower:
+                return True
+                
+        return False
+
     def is_center_popup_button(self, img):
         # สแกนหาปุ่ม (ฟ้าอ่อน หรือ เขียว) ช่วงล่างของจอ (X=25-75%)
         # ครอบคลุมทั้งปุ่มตรงกลาง (Open/Confirm) และปุ่มฝั่งซ้าย (Open All)
