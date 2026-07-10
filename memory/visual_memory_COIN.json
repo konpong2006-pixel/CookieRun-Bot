@@ -2,9 +2,9 @@
     "metadata": {
         "version": "2.0",
         "game_mode": "COIN",
-        "last_updated": 1783703835.3335702,
+        "last_updated": 1783705910.0403738,
         "total_patterns": 10,
-        "total_deaths": 54
+        "total_deaths": 59
     },
     "patterns": [
         {
@@ -1168,12 +1168,12 @@
                 0.34780097007751465
             ],
             "created_at": 1783681424.2002406,
-            "last_seen": 1783703835.3157423,
-            "occurrences": 34,
+            "last_seen": 1783705910.0181825,
+            "occurrences": 39,
             "action_outcomes": {
                 "JUMP": {
                     "success": 0,
-                    "death": 9,
+                    "death": 11,
                     "neutral": 0
                 },
                 "SLIDE": {
@@ -1183,16 +1183,16 @@
                 },
                 "DOUBLE_JUMP": {
                     "success": 0,
-                    "death": 8,
+                    "death": 9,
                     "neutral": 0
                 },
                 "IDLE": {
                     "success": 0,
-                    "death": 8,
+                    "death": 10,
                     "neutral": 0
                 }
             },
-            "recommended_action": "DOUBLE_JUMP",
+            "recommended_action": "SLIDE",
             "confidence": 0.95
         },
         {
