@@ -1,0 +1,1021 @@
+{
+    "ep3": {
+        "runs": [
+            {
+                "date": "2026-07-10 07:00:06",
+                "mode": "BOX",
+                "duration": 23.14,
+                "actions": [
+                    {
+                        "time": 4.07,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.12,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 6.41,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.7,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 8.77,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 9.14,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 10.72,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 11.36,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 13.39,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 13.43,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 15.66,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 15.7,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 17.78,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 18.42,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 19.63,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 20.21,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 21.8,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 22.41,
+                        "action": "JUMP"
+                    }
+                ],
+                "action_count": 18
+            },
+            {
+                "date": "2026-07-10 07:00:06",
+                "mode": "BOX",
+                "duration": 23.18,
+                "actions": [
+                    {
+                        "time": 4.07,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.12,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 6.41,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.7,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 8.77,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 9.14,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 10.72,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 11.36,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 13.39,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 13.43,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 15.66,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 15.7,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 17.78,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 18.42,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 19.63,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 20.21,
+                        "action": "DOUBLE_JUMP"
+                    },
+                    {
+                        "time": 21.8,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 22.41,
+                        "action": "JUMP"
+                    }
+                ],
+                "action_count": 18
+            }
+        ],
+        "collision_timestamps": []
+    },
+    "ep1": {
+        "runs": [
+            {
+                "date": "2026-07-10 07:02:18",
+                "mode": "BOX",
+                "duration": 15.04,
+                "actions": [
+                    {
+                        "time": 4.11,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:02:19",
+                "mode": "BOX",
+                "duration": 15.98,
+                "actions": [
+                    {
+                        "time": 4.11,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:02:19",
+                "mode": "BOX",
+                "duration": 16.06,
+                "actions": [
+                    {
+                        "time": 4.11,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:04:43",
+                "mode": "BOX",
+                "duration": 15.36,
+                "actions": [
+                    {
+                        "time": 4.18,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:04:43",
+                "mode": "BOX",
+                "duration": 16.02,
+                "actions": [
+                    {
+                        "time": 4.18,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:04:43",
+                "mode": "BOX",
+                "duration": 16.12,
+                "actions": [
+                    {
+                        "time": 4.18,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:07:10",
+                "mode": "BOX",
+                "duration": 76.1,
+                "actions": [
+                    {
+                        "time": 4.57,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 4.64,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 4.68,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 9.28,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 9.55,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 10.38,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 14.52,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 14.76,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 15.73,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 19.49,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 19.82,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 20.84,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 24.52,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 24.96,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 25.45,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 29.78,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 30.03,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 30.42,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 34.92,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 35.04,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 35.85,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 39.94,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 40.2,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 41.13,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 45.48,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 45.69,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 47.43,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 50.56,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 50.65,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 52.1,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 55.44,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 55.83,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 57.09,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 60.7,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 61.08,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 62.22,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 65.61,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 66.68,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 67.2,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.12,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.73,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.79,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 75.92,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 43
+            },
+            {
+                "date": "2026-07-10 07:07:10",
+                "mode": "BOX",
+                "duration": 76.18,
+                "actions": [
+                    {
+                        "time": 4.57,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 4.64,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 4.68,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 9.28,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 9.55,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 10.38,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 14.52,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 14.76,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 15.73,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 19.49,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 19.82,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 20.84,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 24.52,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 24.96,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 25.45,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 29.78,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 30.03,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 30.42,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 34.92,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 35.04,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 35.85,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 39.94,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 40.2,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 41.13,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 45.48,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 45.69,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 47.43,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 50.56,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 50.65,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 52.1,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 55.44,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 55.83,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 57.09,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 60.7,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 61.08,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 62.22,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 65.61,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 66.68,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 67.2,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.12,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.73,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.79,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 75.92,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 43
+            },
+            {
+                "date": "2026-07-10 07:07:11",
+                "mode": "BOX",
+                "duration": 76.73,
+                "actions": [
+                    {
+                        "time": 4.57,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 4.64,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 4.68,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 9.28,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 9.55,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 10.38,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 14.52,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 14.76,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 15.73,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 19.49,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 19.82,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 20.84,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 24.52,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 24.96,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 25.45,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 29.78,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 30.03,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 30.42,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 34.92,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 35.04,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 35.85,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 39.94,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 40.2,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 41.13,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 45.48,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 45.69,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 47.43,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 50.56,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 50.65,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 52.1,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 55.44,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 55.83,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 57.09,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 60.7,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 61.08,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 62.22,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 65.61,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 66.68,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 67.2,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.12,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.73,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 71.79,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 75.92,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 43
+            },
+            {
+                "date": "2026-07-10 07:09:34",
+                "mode": "BOX",
+                "duration": 15.71,
+                "actions": [],
+                "action_count": 0
+            },
+            {
+                "date": "2026-07-10 07:09:34",
+                "mode": "BOX",
+                "duration": 16.01,
+                "actions": [],
+                "action_count": 0
+            },
+            {
+                "date": "2026-07-10 07:09:34",
+                "mode": "BOX",
+                "duration": 16.13,
+                "actions": [],
+                "action_count": 0
+            },
+            {
+                "date": "2026-07-10 07:11:33",
+                "mode": "BOX",
+                "duration": 15.23,
+                "actions": [
+                    {
+                        "time": 4.83,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 5.22,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 5.7,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 10.93,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 4
+            },
+            {
+                "date": "2026-07-10 07:11:33",
+                "mode": "BOX",
+                "duration": 15.25,
+                "actions": [
+                    {
+                        "time": 4.83,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 5.22,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 5.7,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 10.93,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 4
+            },
+            {
+                "date": "2026-07-10 07:11:34",
+                "mode": "BOX",
+                "duration": 15.66,
+                "actions": [
+                    {
+                        "time": 4.83,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 5.22,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 5.7,
+                        "action": "SLIDE"
+                    },
+                    {
+                        "time": 10.93,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 4
+            },
+            {
+                "date": "2026-07-10 07:14:48",
+                "mode": "BOX",
+                "duration": 15.84,
+                "actions": [
+                    {
+                        "time": 4.76,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:14:48",
+                "mode": "BOX",
+                "duration": 16.08,
+                "actions": [
+                    {
+                        "time": 4.76,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:14:48",
+                "mode": "BOX",
+                "duration": 16.16,
+                "actions": [
+                    {
+                        "time": 4.76,
+                        "action": "SLIDE"
+                    }
+                ],
+                "action_count": 1
+            },
+            {
+                "date": "2026-07-10 07:16:48",
+                "mode": "BOX",
+                "duration": 15.38,
+                "actions": [
+                    {
+                        "time": 4.07,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.23,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.28,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.03,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.12,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.38,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 8.02,
+                        "action": "JUMP"
+                    }
+                ],
+                "action_count": 7
+            },
+            {
+                "date": "2026-07-10 07:16:49",
+                "mode": "BOX",
+                "duration": 15.5,
+                "actions": [
+                    {
+                        "time": 4.07,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.23,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.28,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.03,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.12,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.38,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 8.02,
+                        "action": "JUMP"
+                    }
+                ],
+                "action_count": 7
+            },
+            {
+                "date": "2026-07-10 07:16:49",
+                "mode": "BOX",
+                "duration": 15.79,
+                "actions": [
+                    {
+                        "time": 4.07,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.23,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 4.28,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.03,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.12,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 6.38,
+                        "action": "JUMP"
+                    },
+                    {
+                        "time": 8.02,
+                        "action": "JUMP"
+                    }
+                ],
+                "action_count": 7
+            }
+        ],
+        "collision_timestamps": []
+    }
+}

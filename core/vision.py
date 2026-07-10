@@ -341,6 +341,8 @@ class Vision:
     def determine_state(self, img):
         if self.is_result_screen(img):
             return "RESULTS"
+        if self.is_prep_screen(img):
+            return "PREP"
         if self.is_lobby_screen(img):
             return "LOBBY"
         return "GAMEPLAY"

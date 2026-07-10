@@ -17,7 +17,13 @@ def get_emulator_window(window_title):
     if not matched_hwnds:
         raise Exception(f"ไม่พบหน้าต่าง Emulator ที่มีชื่อ: {window_title}")
         
+    # เลือก Window ที่มีขนาดใหญ่พอ (ป้องกันไปจับหน้าต่างซ่อน/Updater ของ LDPlayer)
     hwnd = matched_hwnds[0]
+    for h in matched_hwnds:
+        rect = win32gui.GetWindowRect(h)
+        if rect[2] - rect[0] > 300 and rect[3] - rect[1] > 200:
+            hwnd = h
+            break
     # บังคับปรับขนาดหน้าต่าง Emulator ให้เป็นสัดส่วน 16:9 เสมอ (1280x750 เผื่อพื้นที่ Title Bar)
     # เพื่อแก้ปัญหาหน้าจอโดนตัด/แหว่ง เมื่อผู้ใช้ย่อหน้าต่างหรือตั้งค่าผิด
     try:
