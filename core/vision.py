@@ -118,8 +118,6 @@ class Vision:
             
             if is_potato or is_mayo:
                 potato_cnt += 1
-            else:
-                potato_cnt = 0
                 
             # 2. เช็คระดับหัว (หาสิ่งกีดขวางสีทึบ)
             hr, hg, hb = img.getpixel((x, y_head))
