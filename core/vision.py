@@ -56,9 +56,19 @@ class Vision:
         mfcDC.DeleteDC()
         win32gui.ReleaseDC(self.render_hwnd, hwndDC)
 
-        # หากภาพยังคงดำสนิท
+        # หากภาพยังคงดำสนิท ให้ใช้ท่าไม้ตาย ImageGrab (จับภาพสดจากหน้าจอ)
         if img.getbbox() is None:
-            raise Exception("Failed to capture screen (Image is black).")
+            from PIL import ImageGrab
+            try:
+                left_top = win32gui.ClientToScreen(self.render_hwnd, (0, 0))
+                right_bottom = win32gui.ClientToScreen(self.render_hwnd, (width, height))
+                bbox = (left_top[0], left_top[1], right_bottom[0], right_bottom[1])
+                img = ImageGrab.grab(bbox).convert('RGB')
+            except Exception as e:
+                print(f"ImageGrab fallback failed: {e}")
+
+        if img.getbbox() is None:
+            raise Exception("Failed to capture screen (Image is black even with ImageGrab).")
 
         return img
 
