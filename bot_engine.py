@@ -208,8 +208,10 @@ class CookieBot:
                     # ถ้าภาพนิ่งสนิทเกิน 10 วินาที (100 เฟรม) และไม่ได้อยู่ใน GAMEPLAY (ซึ่งมีระบบจับภาพนิ่งของตัวเองอยู่แล้ว)
                     if global_static_frames > 100 and self.current_state != "GAMEPLAY":
                         self.status_msg = "Anti-Stuck Watchdog: Recovering from frozen state (10s)!"
-                        # 1. กดตำแหน่งปุ่ม OK แถวล่าง (เลี่ยงจุดที่ตรงกับรายชื่อเพื่อน)
+                        # 1. กดตำแหน่งปุ่ม OK แถวล่าง (ครอบคลุมปุ่มซ้าย กลาง ขวา เลี่ยงรายชื่อเพื่อน)
                         controller.click_percent(35.0, 85.0)
+                        time.sleep(0.5)
+                        controller.click_percent(50.0, 85.0) # เพิ่มจุดกึ่งกลางสำหรับ Level Up / Daily Reward
                         time.sleep(0.5)
                         controller.click_percent(57.0, 85.0)
                         time.sleep(1)
@@ -220,6 +222,10 @@ class CookieBot:
                     
                     if self.current_state == "LOBBY":
                         self.status_msg = "Checking Lobby status..."
+                        
+                        # กดกึ่งกลางหน้าจอ 1 ครั้งเสมอเมื่อเข้า Lobby เพื่อปิด Level Up Popup หรือ Daily Login
+                        controller.click_percent(50.0, 85.0)
+                        time.sleep(1.0)
                         
                         if self.farm_mode == "BOX_RELIC" and vision.has_get_sign(img, LOBBY_RELIC_GET_AREA):
                             self.status_msg = "Claiming relic..."
