@@ -133,11 +133,21 @@ class CookieBot:
         from core.emulator import get_emulator_window, get_render_window
         from core.vision import Vision
         local_vision = None
+        last_emulator = None
         while True:
             try:
+                if self.emulator_title != last_emulator:
+                    local_vision = None
+                    last_emulator = self.emulator_title
+                    
                 if not local_vision:
+                    if self.emulator_title == "LDPlayer":
+                        r_class, r_title = "RenderWindow", "TheRender"
+                    else:
+                        r_class, r_title = "subWin", "sub"
+                        
                     main_hwnd = get_emulator_window(self.emulator_title)
-                    render_hwnd = get_render_window(main_hwnd, EMULATOR_RENDER_CLASS, EMULATOR_RENDER_TITLE)
+                    render_hwnd = get_render_window(main_hwnd, r_class, r_title)
                     local_vision = Vision(render_hwnd)
                     
                 # แคปจอภาพ 10 ครั้งต่อวินาทีเพื่อส่งเข้าหน้าเว็บแบบ Stream
@@ -157,8 +167,14 @@ class CookieBot:
     def _run_loop(self):
         try:
             self.status_msg = f"Searching for {self.emulator_title}..."
+            
+            if self.emulator_title == "LDPlayer":
+                r_class, r_title = "RenderWindow", "TheRender"
+            else:
+                r_class, r_title = "subWin", "sub"
+                
             main_hwnd = get_emulator_window(self.emulator_title)
-            render_hwnd = get_render_window(main_hwnd, EMULATOR_RENDER_CLASS, EMULATOR_RENDER_TITLE)
+            render_hwnd = get_render_window(main_hwnd, r_class, r_title)
             self.status_msg = "Found Emulator Viewport!"
 
             controller = Controller(render_hwnd)
